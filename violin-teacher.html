@@ -1,0 +1,1520 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>AI Violin Teacher | Haileyonstrings</title>
+<link href="https://fonts.googleapis.com/css2?family=Tangerine:wght@400;700&family=Playfair+Display:wght@600;700&family=Cormorant+Infant:ital,wght@1,500;1,600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --accent:#c9859f;--accent2:#f7e8ef;--text:#2a2a2a;--bg:#fdfbfc;
+  --green:#2d8a5e;--red:#c0392b;--amber:#b07d2a;--blue:#2f6fbe;
+  --surface:#ffffff;--border:#e8d6de;--muted:#7a6470;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:Inter,sans-serif;background:var(--bg);color:var(--text);line-height:1.7;min-height:100vh}
+
+/* ── Nav ── */
+nav{
+  position:fixed;top:0;width:100%;
+  padding:14px 6%;display:flex;justify-content:space-between;align-items:center;
+  background:rgba(253,251,252,.97);backdrop-filter:blur(18px);
+  border-bottom:1px solid var(--border);
+  z-index:999;
+}
+.logo{font-family:"Playfair Display";font-size:22px;color:var(--accent);text-decoration:none;}
+.back-btn{
+  text-decoration:none;color:var(--muted);font-weight:500;font-size:13px;
+  padding:7px 16px;border-radius:6px;border:1px solid var(--border);
+  transition:background .2s;white-space:nowrap;letter-spacing:.2px;
+}
+.back-btn:hover{background:#f5eff2;}
+@media(max-width:500px){
+  nav{padding:12px 4%;}
+  .logo{font-size:18px;}
+  .back-btn{font-size:12px;padding:6px 12px;}
+}
+
+/* ── Main layout ── */
+.main{max-width:860px;margin:0 auto;padding:88px 24px 60px;}
+
+/* ── Page header ── */
+.page-header{margin-bottom:32px;border-bottom:1px solid var(--border);padding-bottom:24px;text-align:center;}
+.page-header h1{
+  font-family:"Tangerine",cursive;font-size:80px;color:var(--accent);
+  font-weight:700;line-height:1;margin-bottom:6px;
+}
+.page-header p{
+  font-family:"Cormorant Infant",serif;font-style:italic;
+  font-size:18px;color:#8b6477;line-height:1.7;
+}
+
+/* ── Section label ── */
+.section-label{
+  font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.9px;
+  color:var(--muted);margin-bottom:8px;
+}
+
+/* ── Cards ── */
+.card{
+  background:var(--surface);border:1px solid var(--border);border-radius:10px;
+  padding:24px 26px;margin-bottom:16px;
+}
+.card-title{
+  font-family:"Cormorant Infant",serif;font-style:italic;
+  font-size:20px;font-weight:500;color:#8b5d73;margin-bottom:14px;
+}
+
+/* ── API key ── */
+.input-row{display:flex;gap:8px;align-items:center;}
+.api-input{
+  flex:1;padding:9px 13px;border-radius:7px;border:1px solid var(--border);
+  font-size:13px;font-family:Inter,sans-serif;background:#fdfbfc;
+  color:var(--text);outline:none;transition:border .2s;
+}
+.api-input:focus{border-color:var(--accent);}
+.save-btn{
+  padding:9px 18px;background:var(--accent);color:#fff;border:none;
+  border-radius:7px;font-size:13px;font-weight:600;cursor:pointer;
+  transition:opacity .2s;white-space:nowrap;letter-spacing:.2px;
+}
+.save-btn:hover{opacity:.88;}
+.api-status{font-size:12px;margin-top:8px;}
+.api-status.ok{color:var(--green);}
+.api-status.err{color:var(--red);}
+.api-note{font-size:12px;color:var(--muted);margin-bottom:14px;line-height:1.6;}
+
+/* ── Controls grid ── */
+.controls{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;}
+@media(max-width:600px){.controls{grid-template-columns:1fr;}}
+
+/* Piece selector */
+.piece-select{
+  width:100%;padding:9px 12px;border-radius:7px;border:1px solid var(--border);
+  font-size:13px;font-family:Inter,sans-serif;background:#fdfbfc;
+  color:var(--text);outline:none;cursor:pointer;
+}
+
+/* Focus toggles */
+.toggle-grid{display:flex;flex-wrap:wrap;gap:6px;}
+.toggle{
+  padding:5px 13px;border-radius:5px;border:1px solid var(--border);
+  font-size:12px;font-weight:500;cursor:pointer;background:#fff;
+  color:var(--muted);transition:all .2s;user-select:none;letter-spacing:.1px;
+}
+.toggle.active{background:var(--accent);color:#fff;border-color:var(--accent);}
+
+/* ── Record area ── */
+.record-area{
+  background:var(--surface);border:1px solid var(--border);border-radius:10px;
+  padding:28px 24px;margin-bottom:16px;text-align:center;
+}
+.record-btn{
+  display:inline-flex;align-items:center;gap:10px;
+  padding:13px 34px;border-radius:7px;border:none;cursor:pointer;
+  font-size:14px;font-weight:600;font-family:Inter,sans-serif;letter-spacing:.2px;
+  transition:all .25s ease;
+}
+.record-btn.idle{background:var(--accent);color:#fff;}
+.record-btn.idle:hover{opacity:.9;}
+.record-btn.recording{background:#c0392b;color:#fff;animation:pulse-btn 1.5s ease-in-out infinite;}
+.record-btn.analyzing{background:#b07d2a;color:#fff;cursor:default;}
+
+@keyframes pulse-btn{
+  0%,100%{box-shadow:0 0 0 0 rgba(192,57,43,.3);}
+  50%{box-shadow:0 0 0 8px rgba(192,57,43,.0);}
+}
+
+.record-dot{width:8px;height:8px;border-radius:50%;background:currentColor;}
+.recording .record-dot{animation:blink 1s step-start infinite;}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:.2;}}
+
+.record-hint{font-size:12px;color:var(--muted);margin-top:12px;line-height:1.5;}
+.timer{font-size:20px;font-weight:600;color:var(--accent);margin-top:10px;min-height:28px;}
+
+/* ── Live meters ── */
+.meters{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px;}
+@media(max-width:500px){.meters{grid-template-columns:1fr 1fr;}}
+.meter{
+  background:#faf5f7;border:1px solid var(--border);border-radius:8px;
+  padding:10px 12px;text-align:center;
+}
+.meter-label{font-size:10px;text-transform:uppercase;letter-spacing:.7px;color:var(--muted);margin-bottom:4px;}
+.meter-value{font-size:17px;font-weight:700;color:var(--accent);}
+.meter-value.green{color:var(--green);}
+.meter-value.amber{color:var(--amber);}
+.meter-value.red{color:var(--red);}
+.meter-sub{font-size:10px;color:#b0909a;margin-top:2px;}
+
+/* pitch bar */
+.pitch-bar-wrap{margin-top:12px;}
+.pitch-bar-label{font-size:11px;color:var(--muted);margin-bottom:5px;text-align:left;}
+.pitch-bar-track{height:8px;background:#ede0e5;border-radius:8px;overflow:hidden;position:relative;}
+.pitch-bar-fill{height:100%;border-radius:8px;background:linear-gradient(90deg,var(--green),var(--amber),var(--red));transition:width .15s ease;}
+.pitch-center-line{position:absolute;left:50%;top:0;width:2px;height:100%;background:rgba(0,0,0,.18);transform:translateX(-50%);}
+
+/* waveform */
+.waveform-wrap{margin-top:12px;}
+canvas#waveform{width:100%;height:52px;border-radius:8px;background:#faf5f7;display:block;}
+
+/* ── Feedback area ── */
+.feedback-area{
+  background:var(--surface);border:1px solid var(--border);border-radius:10px;
+  padding:26px 28px;
+}
+.feedback-area h2{
+  font-family:"Cormorant Infant",serif;font-style:italic;
+  font-size:26px;color:#8b5d73;
+  margin-bottom:20px;
+  padding-bottom:14px;border-bottom:1px solid var(--border);
+}
+
+/* Score badges */
+.score-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin-bottom:22px;}
+.score-badge{
+  border-radius:8px;padding:14px 10px;text-align:center;
+  border:1px solid var(--border);background:#fdfbfc;
+}
+.score-badge .badge-name{
+  font-family:Inter,sans-serif;
+  font-size:10px;font-weight:600;text-transform:uppercase;
+  letter-spacing:.6px;color:var(--muted);margin-bottom:8px;
+}
+.score-badge .badge-score{
+  font-family:"Playfair Display",serif;
+  font-size:28px;font-weight:700;line-height:1;
+}
+.score-badge .badge-grade{font-size:10px;margin-top:5px;color:var(--muted);}
+.score-excellent .badge-score{color:var(--green);}
+.score-good      .badge-score{color:var(--blue);}
+.score-fair      .badge-score{color:var(--amber);}
+.score-poor      .badge-score{color:var(--red);}
+
+/* Teacher message */
+.teacher-msg{
+  background:#fdf8fb;border:1px solid var(--border);border-left:3px solid var(--accent);
+  border-radius:0 8px 8px 0;padding:20px 22px;margin-bottom:20px;
+  font-family:"Cormorant Infant",serif;font-style:italic;
+  font-size:19px;line-height:1.85;color:#7a4a62;
+}
+
+/* Suggestions */
+.suggestions-title{
+  font-family:"Cormorant Infant",serif;font-style:italic;
+  font-size:18px;font-weight:500;color:#8b5d73;
+  margin-bottom:12px;
+}
+.suggestion-item{
+  display:flex;gap:0;align-items:flex-start;
+  padding:11px 14px;margin-bottom:6px;
+  border-radius:7px;border-left:3px solid;
+}
+.suggestion-item.tip   {border-color:var(--blue);background:#f4f7fd;}
+.suggestion-item.warn  {border-color:var(--amber);background:#fdf9f0;}
+.suggestion-item.praise{border-color:var(--green);background:#f4fbf7;}
+.suggestion-text{font-family:Inter,sans-serif;font-size:13px;line-height:1.65;color:#3a2e34;}
+
+/* Empty state */
+.empty-state{
+  text-align:center;padding:40px 20px;
+  font-family:"Cormorant Infant",serif;font-style:italic;
+  font-size:18px;color:#c4a0b4;line-height:1.7;
+}
+.empty-state-title{
+  font-family:"Cormorant Infant",serif;font-style:italic;
+  font-size:22px;color:#b09aa8;margin-bottom:8px;
+}
+
+/* Thinking */
+.thinking{display:flex;align-items:center;gap:10px;justify-content:center;padding:32px;}
+.thinking span{font-family:"Cormorant Infant",serif;font-style:italic;font-size:16px;color:#a08090;}
+.dot-wave{display:flex;gap:4px;}
+.dot-wave div{
+  width:6px;height:6px;border-radius:50%;background:var(--accent);
+  animation:wave .9s ease-in-out infinite;
+}
+.dot-wave div:nth-child(2){animation-delay:.15s;}
+.dot-wave div:nth-child(3){animation-delay:.3s;}
+@keyframes wave{0%,60%,100%{transform:translateY(0);}30%{transform:translateY(-7px);}}
+
+/* Session history */
+.history-section{margin-top:16px;}
+.history-section h3{
+  font-family:"Cormorant Infant",serif;font-style:italic;
+  font-size:18px;font-weight:500;color:#8b5d73;margin-bottom:10px;
+}
+.history-item{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:10px 14px;border-radius:8px;
+  border:1px solid var(--border);margin-bottom:6px;cursor:pointer;
+  transition:background .15s;background:var(--surface);
+}
+.history-item:hover{background:#fdf5f8;}
+.history-meta{font-size:11px;color:var(--muted);}
+.history-piece{font-size:13px;font-weight:500;color:var(--text);}
+.history-scores{display:flex;gap:5px;}
+.hscore{font-size:11px;padding:2px 8px;border-radius:4px;background:#faf5f7;border:1px solid var(--border);color:var(--muted);}
+
+/* Protocol warning */
+.protocol-warning{
+  display:none;background:#fdfaf0;border:1px solid #d4b96a;border-radius:8px;
+  padding:16px 20px;margin-bottom:16px;font-size:13px;color:#5a4a1a;line-height:1.7;
+}
+
+/* Error state */
+.error-item{
+  padding:14px 16px;border-radius:8px;border-left:3px solid var(--red);
+  background:#fdf5f4;margin-bottom:6px;
+}
+.error-title{font-size:13px;font-weight:600;color:var(--red);margin-bottom:4px;}
+.error-msg{font-size:13px;color:#5a3a3a;}
+.error-help{font-size:12px;color:var(--muted);margin-top:8px;line-height:1.6;}
+
+/* responsive */
+@media(max-width:600px){
+  .page-header h1{font-size:26px;}
+  .feedback-area{padding:18px 16px;}
+  .teacher-msg{font-size:16px;}
+  .card{padding:18px;}
+  .input-row{flex-direction:column;}
+}
+/* ── Autocomplete dropdown ── */
+.ac-item{
+  padding:8px 12px;font-size:13px;font-family:Inter,sans-serif;
+  color:var(--text);cursor:pointer;display:flex;align-items:center;gap:8px;
+  transition:background .15s;
+}
+.ac-item:hover,.ac-item.ac-active{background:#fdf0f5;}
+.ac-item strong{color:var(--accent);}
+.ac-section{
+  padding:5px 12px 3px;font-size:10px;font-weight:600;
+  text-transform:uppercase;letter-spacing:.7px;color:var(--muted);
+  border-top:1px solid var(--border);margin-top:2px;
+}
+.ac-section:first-child{border-top:none;margin-top:0;}
+.ac-hist-icon{font-size:11px;color:var(--muted);flex-shrink:0;}
+/* ── Floating music notes ── */
+.music-note{
+position:fixed;
+top:-60px;
+font-size:18px;
+pointer-events:none;
+opacity:.85;
+z-index:2;
+animation:fall linear infinite;
+filter:drop-shadow(0 2px 6px rgba(216,154,178,.35));
+}
+.note1{left:5%;animation-duration:16s;animation-delay:0s;color:#f39ac7}
+.note2{left:18%;animation-duration:12s;animation-delay:2s;color:#d89ab2;font-size:26px}
+.note3{left:32%;animation-duration:18s;animation-delay:4s;color:#b97a97}
+.note4{left:48%;animation-duration:14s;animation-delay:1s;color:#f6a9c8;font-size:24px}
+.note5{left:63%;animation-duration:17s;animation-delay:5s;color:#c97fa1}
+.note6{left:78%;animation-duration:13s;animation-delay:3s;color:#e68ab0;font-size:22px}
+.note7{left:90%;animation-duration:15s;animation-delay:6s;color:#d89ab2}
+@keyframes fall{
+0%{transform:translateY(-80px) translateX(0) rotate(0deg) scale(.8);opacity:0}
+10%{opacity:.9}
+50%{transform:translateY(50vh) translateX(25px) rotate(180deg) scale(1)}
+100%{transform:translateY(110vh) translateX(-25px) rotate(360deg) scale(.8);opacity:0}
+}
+</style>
+</head>
+<body>
+
+<div class="music-note note1">♪</div>
+<div class="music-note note2">♫</div>
+<div class="music-note note3">♬</div>
+<div class="music-note note4">♩</div>
+<div class="music-note note5">♭</div>
+<div class="music-note note6">𝄞</div>
+<div class="music-note note7">♯</div>
+
+<nav>
+  <a class="logo" href="index.html">Haileyonstrings</a>
+  <a class="back-btn" href="index.html">&#8592; Back to Portfolio</a>
+</nav>
+
+<div class="main">
+
+  <!-- Header -->
+  <div class="page-header">
+    <h1>AI Violin Teacher</h1>
+    <p>Record your practice session and receive detailed, personalised feedback on your playing — intonation, rhythm, dynamics, tone quality, and musicality.</p>
+  </div>
+
+  <!-- OpenAI API Key Setup -->
+  <div class="card" id="setupCard">
+    <div class="card-title">Connect Your AI Teacher</div>
+    <p class="api-note">This tool uses the OpenAI API to analyse your playing. Your key is stored only in this browser session and is sent directly to OpenAI — never to any other server.</p>
+    <div class="input-row">
+      <input class="api-input" id="apiKeyInput" type="password" placeholder="sk-…  paste your OpenAI API key here"/>
+      <button class="save-btn" onclick="saveApiKey()">Connect</button>
+    </div>
+    <div class="api-status" id="apiStatus"></div>
+  </div>
+
+  <!-- Controls: piece + focus areas -->
+  <div class="controls">
+    <div class="card" style="margin-bottom:0;">
+      <div class="card-title">Piece</div>
+      <select class="piece-select" id="pieceSelect">
+        <option value="">— Select category —</option>
+        <option value="Scales">Scales</option>
+        <option value="Repertoire">Repertoire</option>
+        <option value="Improvisation">Improvisation</option>
+        <option value="Other pieces">Other pieces</option>
+      </select>
+      <!-- Autocomplete input wrapper -->
+      <div id="customPieceWrap" style="display:none;margin-top:10px;position:relative;">
+        <input class="api-input" id="customPiece" type="text"
+               placeholder="Enter name…"
+               autocomplete="off"
+               style="width:100%;padding-right:30px;"/>
+        <div id="acDropdown" style="
+          display:none;position:absolute;top:calc(100% + 4px);left:0;right:0;
+          background:#fff;border:1px solid var(--border);border-radius:8px;
+          box-shadow:0 8px 24px rgba(0,0,0,.1);z-index:200;max-height:200px;overflow-y:auto;">
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:0;">
+      <div class="card-title">Focus Areas</div>
+      <div class="toggle-grid" id="focusToggles">
+        <div class="toggle active" data-val="intonation">Intonation</div>
+        <div class="toggle active" data-val="rhythm">Rhythm</div>
+        <div class="toggle active" data-val="dynamics">Dynamics</div>
+        <div class="toggle active" data-val="tone">Tone Quality</div>
+        <div class="toggle active" data-val="musicality">Musicality</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Record area -->
+  <div class="record-area">
+    <button class="record-btn idle" id="recordBtn" onclick="toggleRecording()">
+      <div class="record-dot"></div>
+      <span id="recordLabel">Start Recording</span>
+    </button>
+    <div class="timer" id="timer"></div>
+    <div class="record-hint" id="recordHint">Press the button, then play your piece. Recording stops automatically after 90 seconds, or press again to stop early and receive feedback.</div>
+
+    <!-- Live meters -->
+    <div class="meters" id="liveMeters" style="display:none;">
+      <div class="meter">
+        <div class="meter-label">Note Detected</div>
+        <div class="meter-value" id="mNote">—</div>
+        <div class="meter-sub" id="mFreq">— Hz</div>
+      </div>
+      <div class="meter">
+        <div class="meter-label">Tuning</div>
+        <div class="meter-value" id="mTune">—</div>
+        <div class="meter-sub" id="mCents">— cents</div>
+      </div>
+      <div class="meter">
+        <div class="meter-label">Volume</div>
+        <div class="meter-value" id="mVol">—</div>
+        <div class="meter-sub">dB</div>
+      </div>
+    </div>
+
+    <div class="pitch-bar-wrap" id="pitchBarWrap" style="display:none;">
+      <div class="pitch-bar-label">Pitch accuracy — centre line = in tune</div>
+      <div class="pitch-bar-track">
+        <div class="pitch-center-line"></div>
+        <div class="pitch-bar-fill" id="pitchBarFill" style="width:50%;"></div>
+      </div>
+    </div>
+
+    <div class="waveform-wrap" id="waveformWrap" style="display:none;">
+      <canvas id="waveform"></canvas>
+    </div>
+  </div>
+
+  <!-- Protocol warning -->
+  <div class="protocol-warning" id="protocolWarning">
+    <strong>Microphone and API access are blocked.</strong><br/>
+    This page is being opened as a local file (<code>file://</code>). Browsers block microphone and network access from local files.<br/><br/>
+    <strong>To resolve this, serve the page over HTTP:</strong><br/>
+    1. In VS Code, install <a href="https://marketplace.visualstudio.com/items?itemName=ritwickdey.LiveServer" target="_blank" style="color:var(--accent);">Live Server</a> and click Go Live, or<br/>
+    2. Run <code>npx serve .</code> in a terminal and open <code>http://localhost:3000/violin-teacher.html</code>, or<br/>
+    3. Deploy to GitHub Pages.
+  </div>
+
+  <!-- Feedback area -->
+  <div class="feedback-area">
+    <h2>AI Violin Teacher's Feedback</h2>
+    <div id="feedbackContent">
+      <div class="empty-state">
+        <div class="empty-state-title">Ready to listen</div>
+        When you play, I'll listen carefully and give you feedback just like Teacher Diana would.
+      </div>
+    </div>
+  </div>
+
+  <!-- Session history -->
+  <div class="history-section" id="historySection" style="display:none;">
+    <h3>Session History</h3>
+    <div id="historyList"></div>
+  </div>
+
+</div><!-- /main -->
+
+<script>
+// ══════════════════════════════════════════════
+//  Protocol check — warn if running as file://
+// ══════════════════════════════════════════════
+(function(){
+  if(location.protocol === 'file:'){
+    document.getElementById('protocolWarning').style.display = 'block';
+  }
+})();
+
+// ══════════════════════════════════════════════
+//  State
+// ══════════════════════════════════════════════
+let apiKey = sessionStorage.getItem('oai_key') || '';
+let mediaRecorder = null;
+let audioChunks = [];
+let isRecording = false;
+let timerInterval = null;
+let elapsedSec = 0;
+let audioCtx = null;
+let analyser = null;
+let animFrame = null;
+let micStream = null;
+let sessionHistory = [];
+
+// Accumulated live stats for analysis context
+let liveStats = { pitchSamples:[], volSamples:[], noteNames:[], silenceCount:0, totalFrames:0 };
+
+// ══════════════════════════════════════════════
+//  API Key
+// ══════════════════════════════════════════════
+function saveApiKey(){
+  const val = document.getElementById('apiKeyInput').value.trim();
+  if(!val.startsWith('sk-')){
+    setApiStatus('Please enter a valid OpenAI API key (starts with sk-…)', 'err'); return;
+  }
+  apiKey = val;
+  sessionStorage.setItem('oai_key', val);
+  setApiStatus('✓ Connected — your AI teacher is ready!', 'ok');
+  document.getElementById('apiKeyInput').value = '●●●●●●●●●●●●●●●●';
+  // Quick connectivity test
+  testApiKey(val);
+}
+async function testApiKey(key){
+  try {
+    const r = await fetch('https://api.openai.com/v1/models', {
+      headers:{ 'Authorization':'Bearer '+key }
+    });
+    if(r.status === 401){
+      setApiStatus('❌ Invalid API key — please check and re-enter it.','err');
+      apiKey=''; sessionStorage.removeItem('oai_key'); return;
+    }
+    if(r.status === 429){
+      setApiStatus('⚠️ API key valid but rate-limited or has no credits. Add credits at platform.openai.com/billing','err'); return;
+    }
+    if(!r.ok){ setApiStatus('⚠️ API key accepted but server returned: '+r.status,'err'); return; }
+    setApiStatus('✓ API key verified — AI teacher is ready!','ok');
+  } catch(e){
+    setApiStatus('⚠️ Could not reach OpenAI. Check your internet connection.','err');
+  }
+}
+function setApiStatus(msg, cls){
+  const el = document.getElementById('apiStatus');
+  el.textContent = msg; el.className = 'api-status ' + cls;
+}
+if(apiKey){ setApiStatus('✓ API key loaded from this session.', 'ok'); }
+
+// ══════════════════════════════════════════════
+//  Autocomplete data
+// ══════════════════════════════════════════════
+const AC_DATA = {
+  Scales: [
+    'A Major','A Minor','A Harmonic Minor','A Melodic Minor',
+    'B Major','B Minor','B Harmonic Minor',
+    'C Major','C Minor','C Harmonic Minor',
+    'D Major','D Minor','D Harmonic Minor','D Melodic Minor',
+    'E Major','E Minor','E Harmonic Minor',
+    'F Major','F Minor','F Harmonic Minor',
+    'G Major','G Minor','G Harmonic Minor',
+    'A Major 2 octaves','D Major 2 octaves','G Major 2 octaves',
+    'Chromatic Scale','Pentatonic Scale','Whole Tone Scale',
+    'Open String Exercise','Arpeggios in D Major','Arpeggios in A Major'
+  ],
+  Repertoire: [
+    'Twinkle Twinkle Little Star','Lightly Row','Song of the Wind',
+    'Go Tell Aunt Rhody','O Come Little Children','May Song','Long Long Ago',
+    'Mary Had a Little Lamb','Perpetual Motion','Allegretto','Andantino',
+    'Minuet No.1 – Bach','Minuet No.2 – Bach','Minuet No.3 – Bach',
+    'Gavotte – Gossec','Humoresque – Dvořák','Bourree – Handel',
+    'Chorus from Judas Maccabaeus','Long Long Ago','Hunter\'s Chorus',
+    'Witches\' Dance','Concerto in A Minor – Vivaldi','Concerto in G Minor – Vivaldi'
+  ],
+  'Other pieces': []
+};
+
+// Load history from localStorage
+function loadHistory(category){
+  try { return JSON.parse(localStorage.getItem('vc_history_'+category)||'[]'); }
+  catch(e){ return []; }
+}
+function saveHistory(category, value){
+  if(!value.trim()) return;
+  const key = 'vc_history_'+category;
+  let hist = loadHistory(category);
+  hist = [value, ...hist.filter(h=>h.toLowerCase()!==value.toLowerCase())].slice(0,10);
+  localStorage.setItem(key, JSON.stringify(hist));
+}
+
+// ══════════════════════════════════════════════
+//  Piece selector
+// ══════════════════════════════════════════════
+const NEEDS_NAME = ['Scales','Repertoire','Other pieces'];
+const PLACEHOLDERS = { Scales:'e.g. D Major, A Minor…', Repertoire:'e.g. Twinkle Twinkle…', 'Other pieces':'Enter piece name…' };
+let currentCategory = '';
+
+document.getElementById('pieceSelect').addEventListener('change', function(){
+  const wrap = document.getElementById('customPieceWrap');
+  const input = document.getElementById('customPiece');
+  currentCategory = this.value;
+  if(NEEDS_NAME.includes(this.value)){
+    input.placeholder = PLACEHOLDERS[this.value] || 'Enter name…';
+    input.value = '';
+    wrap.style.display = 'block';
+    input.focus();
+    showDropdown('');
+  } else {
+    wrap.style.display = 'none';
+    input.value = '';
+    hideDropdown();
+  }
+});
+
+// ── Autocomplete logic ──
+const acInput = document.getElementById('customPiece');
+const acDrop  = document.getElementById('acDropdown');
+
+acInput.addEventListener('input', function(){ showDropdown(this.value); });
+acInput.addEventListener('focus', function(){ showDropdown(this.value); });
+acInput.addEventListener('keydown', function(e){
+  const items = acDrop.querySelectorAll('.ac-item');
+  const active = acDrop.querySelector('.ac-item.ac-active');
+  if(e.key==='ArrowDown'){
+    e.preventDefault();
+    const next = active ? active.nextElementSibling : items[0];
+    if(next){ active && active.classList.remove('ac-active'); next.classList.add('ac-active'); next.scrollIntoView({block:'nearest'}); }
+  } else if(e.key==='ArrowUp'){
+    e.preventDefault();
+    const prev = active ? active.previousElementSibling : items[items.length-1];
+    if(prev){ active && active.classList.remove('ac-active'); prev.classList.add('ac-active'); prev.scrollIntoView({block:'nearest'}); }
+  } else if(e.key==='Enter'){
+    e.preventDefault();
+    if(active){ selectItem(active.dataset.val); }
+  } else if(e.key==='Escape'){
+    hideDropdown();
+  }
+});
+
+document.addEventListener('click', function(e){
+  if(!document.getElementById('customPieceWrap').contains(e.target)) hideDropdown();
+});
+
+function showDropdown(query){
+  if(!currentCategory || !NEEDS_NAME.includes(currentCategory)){ hideDropdown(); return; }
+  const q = query.trim().toLowerCase();
+  const library = AC_DATA[currentCategory] || [];
+  const history = loadHistory(currentCategory);
+
+  // Filter library suggestions
+  const libMatches = q
+    ? library.filter(s=>s.toLowerCase().includes(q))
+    : library.slice(0,8);
+
+  // Filter history (exclude duplicates already in libMatches)
+  const histMatches = history.filter(h=>
+    h.toLowerCase().includes(q) &&
+    !libMatches.some(l=>l.toLowerCase()===h.toLowerCase())
+  );
+
+  if(!libMatches.length && !histMatches.length){ hideDropdown(); return; }
+
+  let html = '';
+  if(histMatches.length){
+    html += `<div class="ac-section">Recent</div>`;
+    histMatches.forEach(h=>{
+      html += `<div class="ac-item" data-val="${escAc(h)}"><span class="ac-hist-icon">↩</span>${escAc(h)}</div>`;
+    });
+  }
+  if(libMatches.length){
+    if(histMatches.length) html += `<div class="ac-section">Suggestions</div>`;
+    libMatches.forEach(s=>{
+      html += `<div class="ac-item" data-val="${escAc(s)}">${highlightMatch(s,q)}</div>`;
+    });
+  }
+
+  acDrop.innerHTML = html;
+  acDrop.querySelectorAll('.ac-item').forEach(el=>{
+    el.addEventListener('mousedown', e=>{ e.preventDefault(); selectItem(el.dataset.val); });
+  });
+  acDrop.style.display = 'block';
+}
+
+function selectItem(val){
+  acInput.value = val;
+  hideDropdown();
+  acInput.focus();
+}
+function hideDropdown(){ acDrop.style.display = 'none'; }
+function escAc(s){ return s.replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
+function highlightMatch(text, q){
+  if(!q) return text;
+  const idx = text.toLowerCase().indexOf(q);
+  if(idx<0) return text;
+  return text.slice(0,idx)+'<strong>'+text.slice(idx,idx+q.length)+'</strong>'+text.slice(idx+q.length);
+}
+
+// ══════════════════════════════════════════════
+//  Focus toggles
+// ══════════════════════════════════════════════
+document.querySelectorAll('.toggle').forEach(t=>{
+  t.addEventListener('click', ()=> t.classList.toggle('active'));
+});
+function getActiveFocus(){
+  return [...document.querySelectorAll('.toggle.active')].map(t=>t.dataset.val);
+}
+
+// ══════════════════════════════════════════════
+//  Timer
+// ══════════════════════════════════════════════
+function startTimer(){
+  elapsedSec = 0;
+  document.getElementById('timer').textContent = '0:00';
+  timerInterval = setInterval(()=>{
+    elapsedSec++;
+    const m = Math.floor(elapsedSec/60);
+    const s = String(elapsedSec%60).padStart(2,'0');
+    document.getElementById('timer').textContent = m+':'+s;
+    if(elapsedSec >= 90) stopRecording();
+  }, 1000);
+}
+function stopTimer(){ clearInterval(timerInterval); }
+
+// ══════════════════════════════════════════════
+//  Pitch detection (YIN-inspired autocorrelation)
+// ══════════════════════════════════════════════
+const NOTE_STRINGS = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+
+function freqToNote(freq){
+  if(freq <= 0) return {note:'—', cents:0, octave:0};
+  const semitones = 12 * Math.log2(freq / 440);
+  const rounded = Math.round(semitones);
+  const noteIdx = ((rounded % 12) + 12) % 12;
+  const octave = Math.floor((rounded + 69) / 12) - 1;
+  const idealFreq = 440 * Math.pow(2, rounded/12);
+  const cents = Math.round(1200 * Math.log2(freq / idealFreq));
+  return { note: NOTE_STRINGS[noteIdx], cents, octave };
+}
+
+function autoCorrelate(buf, sampleRate){
+  const SIZE = buf.length;
+  let rms = 0;
+  for(let i=0;i<SIZE;i++) rms += buf[i]*buf[i];
+  rms = Math.sqrt(rms/SIZE);
+  if(rms < 0.01) return -1; // silence
+
+  let r1=0, r2=SIZE-1, thres=0.2;
+  for(let i=0;i<SIZE/2;i++) if(Math.abs(buf[i])<thres){ r1=i; break; }
+  for(let i=1;i<SIZE/2;i++) if(Math.abs(buf[SIZE-i])<thres){ r2=SIZE-i; break; }
+  const buf2 = buf.slice(r1, r2);
+  const len = buf2.length;
+
+  const c = new Float32Array(len);
+  for(let i=0;i<len;i++) for(let j=0;j<len-i;j++) c[i] += buf2[j]*buf2[j+i];
+
+  let d=0;
+  while(d<len && c[d]>c[d+1]) d++;
+  let maxVal=-1, maxPos=-1;
+  for(let i=d;i<len;i++) if(c[i]>maxVal){ maxVal=c[i]; maxPos=i; }
+
+  let T0 = maxPos;
+  const x1=c[T0-1], x2=c[T0], x3=c[T0+1];
+  const a=(x1+x3-2*x2)/2, b=(x3-x1)/2;
+  if(a) T0 = T0 - b/(2*a);
+
+  return sampleRate / T0;
+}
+
+// ══════════════════════════════════════════════
+//  Live visualisation loop
+// ══════════════════════════════════════════════
+function startVisualization(stream){
+  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  const source = audioCtx.createMediaStreamSource(stream);
+  analyser = audioCtx.createAnalyser();
+  analyser.fftSize = 2048;
+  source.connect(analyser);
+
+  const bufLen = analyser.frequencyBinCount;
+  const timeDomainData = new Float32Array(analyser.fftSize);
+  const freqData = new Uint8Array(bufLen);
+  const canvas = document.getElementById('waveform');
+  const ctx = canvas.getContext('2d');
+  canvas.width = canvas.offsetWidth * window.devicePixelRatio;
+  canvas.height = 56 * window.devicePixelRatio;
+  ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+  const W = canvas.offsetWidth, H = 56;
+
+  liveStats = { pitchSamples:[], volSamples:[], noteNames:[], silenceCount:0, totalFrames:0 };
+
+  function draw(){
+    animFrame = requestAnimationFrame(draw);
+    analyser.getFloatTimeDomainData(timeDomainData);
+    analyser.getByteFrequencyData(freqData);
+    liveStats.totalFrames++;
+
+    // Volume (RMS → dB)
+    let rms = 0;
+    for(let i=0;i<timeDomainData.length;i++) rms += timeDomainData[i]*timeDomainData[i];
+    rms = Math.sqrt(rms/timeDomainData.length);
+    const db = rms > 0.0001 ? Math.round(20*Math.log10(rms)) : -80;
+    liveStats.volSamples.push(db);
+
+    // Pitch
+    const freq = autoCorrelate(timeDomainData, audioCtx.sampleRate);
+    const noteInfo = freq > 0 ? freqToNote(freq) : null;
+
+    if(noteInfo && freq > 180 && freq < 2100){ // violin range
+      liveStats.pitchSamples.push(noteInfo.cents);
+      liveStats.noteNames.push(noteInfo.note + noteInfo.octave);
+
+      const mNote = document.getElementById('mNote');
+      const mFreq = document.getElementById('mFreq');
+      const mTune = document.getElementById('mTune');
+      const mCents = document.getElementById('mCents');
+
+      mNote.textContent = noteInfo.note + noteInfo.octave;
+      mFreq.textContent = Math.round(freq) + ' Hz';
+
+      const absCents = Math.abs(noteInfo.cents);
+      let tuneLabel, tuneClass;
+      if(absCents <= 10){ tuneLabel='In tune ✓'; tuneClass='green';}
+      else if(absCents <= 25){ tuneLabel= noteInfo.cents>0?'Slightly sharp':'Slightly flat'; tuneClass='amber';}
+      else { tuneLabel= noteInfo.cents>0?'Sharp':'Flat'; tuneClass='red';}
+
+      mTune.textContent = tuneLabel;
+      mTune.className = 'meter-value ' + tuneClass;
+      mCents.textContent = (noteInfo.cents > 0 ? '+' : '') + noteInfo.cents + ' cents';
+
+      // pitch bar (50% = centre = in tune, ±50 cents = ±50%)
+      const pct = Math.max(5, Math.min(95, 50 + noteInfo.cents));
+      document.getElementById('pitchBarFill').style.width = pct + '%';
+    } else {
+      liveStats.silenceCount++;
+    }
+
+    // Volume meter
+    const volEl = document.getElementById('mVol');
+    if(db > -10){ volEl.textContent = 'Loud'; volEl.className='meter-value green';}
+    else if(db > -30){ volEl.textContent = 'Medium'; volEl.className='meter-value amber';}
+    else if(db > -55){ volEl.textContent = 'Soft'; volEl.className='meter-value';}
+    else { volEl.textContent = 'Silent'; volEl.className='meter-value';}
+
+    // Waveform
+    ctx.clearRect(0,0,W,H);
+    ctx.fillStyle='#fdf5f8';
+    ctx.fillRect(0,0,W,H);
+    ctx.lineWidth=1.5;
+    ctx.strokeStyle='#d89ab2';
+    ctx.beginPath();
+    const sliceW = W / bufLen;
+    let x = 0;
+    for(let i=0;i<bufLen;i++){
+      const v = freqData[i] / 255.0;
+      const y = H - v * H;
+      i===0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
+      x += sliceW;
+    }
+    ctx.stroke();
+  }
+  draw();
+}
+
+function stopVisualization(){
+  if(animFrame) cancelAnimationFrame(animFrame);
+  if(audioCtx){ audioCtx.close(); audioCtx=null; }
+}
+
+// ══════════════════════════════════════════════
+//  Recording
+// ══════════════════════════════════════════════
+async function toggleRecording(){
+  if(isRecording){ stopRecording(); return; }
+
+  if(!apiKey){
+    alert('Please enter your OpenAI API key first to enable AI feedback.');
+    document.getElementById('apiKeyInput').focus();
+    return;
+  }
+
+  try {
+    micStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+  } catch(e){
+    alert('Microphone access is required. Please allow microphone permissions and try again.');
+    return;
+  }
+
+  audioChunks = [];
+  mediaRecorder = new MediaRecorder(micStream, { mimeType: getSupportedMimeType() });
+  mediaRecorder.ondataavailable = e => { if(e.data.size>0) audioChunks.push(e.data); };
+  mediaRecorder.onstop = handleRecordingStop;
+  mediaRecorder.start(250);
+
+  isRecording = true;
+  startTimer();
+  startVisualization(micStream);
+
+  // Show live UI
+  document.getElementById('liveMeters').style.display = 'grid';
+  document.getElementById('pitchBarWrap').style.display = 'block';
+  document.getElementById('waveformWrap').style.display = 'block';
+  setRecordBtn('recording', '■  Stop & Get Feedback');
+  document.getElementById('recordHint').textContent = 'Listening… play your piece now. Press stop when done.';
+}
+
+function stopRecording(){
+  if(!isRecording) return;
+  isRecording = false;
+  stopTimer();
+  if(mediaRecorder && mediaRecorder.state !== 'inactive') mediaRecorder.stop();
+  micStream.getTracks().forEach(t => t.stop());
+  stopVisualization();
+  setRecordBtn('analyzing','Analysing your playing…');
+  document.getElementById('recordHint').textContent = 'Your AI teacher is listening to the recording…';
+}
+
+function getSupportedMimeType(){
+  const types = ['audio/webm;codecs=opus','audio/webm','audio/ogg;codecs=opus','audio/mp4'];
+  for(const t of types) if(MediaRecorder.isTypeSupported(t)) return t;
+  return '';
+}
+
+function setRecordBtn(state, label){
+  const btn = document.getElementById('recordBtn');
+  btn.className = 'record-btn ' + state;
+  document.getElementById('recordLabel').textContent = label;
+}
+
+// ══════════════════════════════════════════════
+//  After recording stops → send to OpenAI
+// ══════════════════════════════════════════════
+async function handleRecordingStop(){
+  const mimeType = getSupportedMimeType() || 'audio/webm';
+  const blob = new Blob(audioChunks, { type: mimeType });
+  const duration = elapsedSec;
+
+  // Show thinking state
+  document.getElementById('feedbackContent').innerHTML = `
+    <div class="thinking">
+      <div class="dot-wave"><div></div><div></div><div></div></div>
+      <span>Teacher is listening and thinking…</span>
+    </div>`;
+
+  // Reset UI immediately so user isn't stuck
+  setRecordBtn('idle', 'Start Listening');
+  document.getElementById('recordHint').textContent = 'Press the button, then play your piece. Recording stops automatically after 90 seconds, or press again to stop early.';
+  document.getElementById('timer').textContent = '';
+  document.getElementById('liveMeters').style.display = 'none';
+  document.getElementById('pitchBarWrap').style.display = 'none';
+  document.getElementById('waveformWrap').style.display = 'none';
+
+  // Compute live analysis summary
+  // Save entered name to history
+  const cat = document.getElementById('pieceSelect').value;
+  const detail = document.getElementById('customPiece').value.trim();
+  if(detail && ['Scales','Repertoire','Other pieces'].includes(cat)) saveHistory(cat, detail);
+
+  const analysisSummary = buildAnalysisSummary(duration);
+
+  // Transcribe with Whisper — OPTIONAL, never blocks feedback
+  let transcription = '';
+  try {
+    const controller = new AbortController();
+    const tid = setTimeout(()=>controller.abort(), 20000); // 20s timeout
+    transcription = await transcribeAudio(blob, mimeType, controller.signal);
+    clearTimeout(tid);
+  } catch(e){
+    transcription = '[Audio transcription unavailable]';
+  }
+
+  // Get AI feedback from GPT-4o — with retry on JSON parse fail
+  let attempts = 0;
+  while(attempts < 2){
+    try {
+      const feedback = await getAIFeedback(analysisSummary, transcription, duration);
+      renderFeedback(feedback, analysisSummary);
+      addToHistory(feedback, analysisSummary);
+      return;
+    } catch(e) {
+      attempts++;
+      if(attempts >= 2){
+        renderError(e);
+        return;
+      }
+      // Brief pause before retry
+      await new Promise(r=>setTimeout(r,1000));
+    }
+  }
+}
+
+// ══════════════════════════════════════════════
+//  Build analysis summary from live data
+// ══════════════════════════════════════════════
+function buildAnalysisSummary(duration){
+  const ps = liveStats.pitchSamples;
+  const vs = liveStats.volSamples;
+
+  const avgCents = ps.length ? ps.reduce((a,b)=>a+b,0)/ps.length : 0;
+  const inTuneCount = ps.filter(c=>Math.abs(c)<=15).length;
+  const inTunePct = ps.length ? Math.round(100*inTuneCount/ps.length) : 0;
+  const sharpCount = ps.filter(c=>c>15).length;
+  const flatCount  = ps.filter(c=>c<-15).length;
+
+  // Rhythm regularity — std-dev of abs(cents) as proxy for consistency
+  let stdDev = 0;
+  if(ps.length > 1){
+    const mean = ps.reduce((a,b)=>a+b,0)/ps.length;
+    stdDev = Math.sqrt(ps.reduce((a,b)=>a+(b-mean)**2,0)/ps.length);
+  }
+
+  // Volume dynamics
+  const filtVol = vs.filter(v=>v>-60);
+  const maxVol = filtVol.length ? Math.max(...filtVol) : -60;
+  const minVol = filtVol.length ? Math.min(...filtVol) : -60;
+  const dynRange = maxVol - minVol;
+
+  // Silence ratio
+  const silencePct = liveStats.totalFrames ? Math.round(100*liveStats.silenceCount/liveStats.totalFrames) : 0;
+
+  // Most common notes
+  const noteFreq = {};
+  liveStats.noteNames.forEach(n=>{ noteFreq[n]=(noteFreq[n]||0)+1; });
+  const topNotes = Object.entries(noteFreq).sort((a,b)=>b[1]-a[1]).slice(0,6).map(e=>e[0]).join(', ');
+
+  // Piece & focus
+  let piece = document.getElementById('pieceSelect').value;
+  const needsName = ['Scales','Repertoire','Other pieces'];
+  if(needsName.includes(piece)){
+    const detail = document.getElementById('customPiece').value.trim();
+    piece = detail ? piece + ' – ' + detail : piece;
+  }
+  const focus = getActiveFocus();
+
+  return { avgCents, inTunePct, sharpCount, flatCount, stdDev, dynRange, maxVol, minVol,
+           silencePct, topNotes, duration, piece, focus };
+}
+
+// ══════════════════════════════════════════════
+//  Whisper transcription (for rhythm/lyric context)
+// ══════════════════════════════════════════════
+async function transcribeAudio(blob, mimeType, signal){
+  const ext = mimeType.includes('mp4') ? 'mp4' : mimeType.includes('ogg') ? 'ogg' : 'webm';
+  const formData = new FormData();
+  formData.append('file', blob, 'recording.' + ext);
+  formData.append('model', 'whisper-1');
+  formData.append('response_format', 'text');
+  formData.append('language', 'en');
+
+  const res = await fetch('https://api.openai.com/v1/audio/transcriptions', {
+    method: 'POST',
+    headers: { 'Authorization': 'Bearer ' + apiKey },
+    body: formData,
+    signal
+  });
+  if(!res.ok) return '[Transcription unavailable]';
+  return (await res.text()).trim();
+}
+
+// ══════════════════════════════════════════════
+//  GPT-4o feedback generation
+// ══════════════════════════════════════════════
+async function getAIFeedback(stats, transcription, duration){
+  const pieceStr = stats.piece || 'general violin practice';
+  const focusStr = stats.focus.join(', ') || 'intonation, rhythm, dynamics, tone, musicality';
+
+  const systemPrompt = `You are Teacher Diana, a warm, encouraging, and expert violin teacher for children. 
+You are teaching Hailey, a young beginner violinist from Singapore (she started violin in 2025).
+Your teaching style: patient, constructive, specific, always positive first then gently corrective.
+You believe music is about joy, expression, and gradual improvement.
+Always end with an uplifting encouragement.
+
+Your feedback must be a valid JSON object with this exact structure:
+{
+  "overall_message": "A warm 2-3 sentence personal message from you to Hailey, written as if speaking directly to her. Start with something positive you noticed.",
+  "scores": {
+    "intonation": <number 1-10>,
+    "rhythm": <number 1-10>,
+    "dynamics": <number 1-10>,
+    "tone": <number 1-10>,
+    "musicality": <number 1-10>
+  },
+  "suggestions": [
+    { "type": "praise|tip|warn", "icon": "emoji", "text": "specific, actionable feedback" },
+    ... (4-6 items total, always start with at least 1 praise)
+  ],
+  "practice_tip": "One specific, fun practice exercise Hailey can do right now to improve the biggest area."
+}
+Only return the JSON object. No markdown fences.`;
+
+  const userPrompt = `Hailey just finished playing: "${pieceStr}"
+Duration: ${duration} seconds
+Focus areas requested: ${focusStr}
+
+Live acoustic measurements from this session:
+- Pitch accuracy: ${stats.inTunePct}% of notes were in tune (within ±15 cents)
+- Pitch tendency: ${stats.sharpCount} sharp moments, ${stats.flatCount} flat moments
+- Average pitch deviation: ${Math.round(stats.avgCents)} cents (positive=sharp, negative=flat)  
+- Pitch consistency (std dev): ${Math.round(stats.stdDev)} cents
+- Dynamic range: ${Math.round(stats.dynRange)} dB (min: ${Math.round(stats.minVol)} dB, max: ${Math.round(stats.maxVol)} dB)
+- Silence ratio: ${stats.silencePct}% (high = hesitations or pauses between notes)
+- Notes detected: ${stats.topNotes || 'not detected clearly'}
+- Audio transcription (what Whisper heard — use as context, not literal lyrics): "${transcription}"
+
+Please score only the focus areas that were selected. For others, give a neutral 7.
+Give warm, age-appropriate feedback that Teacher Diana would give to a young beginner.`;
+
+  const res = await fetch('https://api.openai.com/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Authorization': 'Bearer ' + apiKey,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      model: 'gpt-4o',
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user',   content: userPrompt }
+      ],
+      temperature: 0.75,
+      max_tokens: 900
+    })
+  });
+
+  if(!res.ok){
+    let errMsg = 'OpenAI API error ' + res.status;
+    try {
+      const err = await res.json();
+      errMsg = err.error?.message || errMsg;
+      // Friendly messages for common codes
+      if(res.status === 401) errMsg = 'Invalid API key. Please re-enter your OpenAI key.';
+      if(res.status === 429) errMsg = 'Rate limit or no credits. Please add credits at platform.openai.com/billing';
+      if(res.status === 500) errMsg = 'OpenAI server error. Please try again in a moment.';
+    } catch(_){}
+    throw new Error(errMsg);
+  }
+  const data = await res.json();
+  const raw = data.choices[0].message.content.trim();
+  // Strip any markdown fences the model might add
+  const clean = raw
+    .replace(/^```json\s*/i,'')
+    .replace(/^```\s*/,'')
+    .replace(/```\s*$/,'')
+    .trim();
+  // Safe JSON parse with fallback
+  let parsed;
+  try {
+    parsed = JSON.parse(clean);
+  } catch(parseErr){
+    // Try to extract JSON object from any surrounding text
+    const match = clean.match(/\{[\s\S]*\}/);
+    if(match){
+      try { parsed = JSON.parse(match[0]); }
+      catch(_){ throw new Error('AI returned unexpected format. Retrying…'); }
+    } else {
+      throw new Error('AI returned unexpected format. Retrying…');
+    }
+  }
+  return parsed;
+}
+
+// ══════════════════════════════════════════════
+//  Render feedback
+// ══════════════════════════════════════════════
+function scoreClass(s){
+  if(s>=8) return 'score-excellent';
+  if(s>=6) return 'score-good';
+  if(s>=4) return 'score-fair';
+  return 'score-poor';
+}
+function gradeLabel(s){
+  if(s>=9) return 'Excellent';
+  if(s>=7) return 'Good';
+  if(s>=5) return 'Developing';
+  return 'Needs work';
+}
+function scoreName(name){
+  const m = {intonation:'Intonation',rhythm:'Rhythm',dynamics:'Dynamics',tone:'Tone Quality',musicality:'Musicality'};
+  return m[name] || name.charAt(0).toUpperCase()+name.slice(1);
+}
+
+function renderFeedback(fb, stats){
+  const scores = fb.scores || {};
+  const suggestions = fb.suggestions || [];
+
+  let scoresHtml = '';
+  for(const [name, val] of Object.entries(scores)){
+    const cls = scoreClass(val);
+    scoresHtml += `
+      <div class="score-badge ${cls}">
+        <div class="badge-name">${scoreName(name)}</div>
+        <div class="badge-score">${val}<small style="font-size:13px;font-weight:400;color:inherit;opacity:.6;">/10</small></div>
+        <div class="badge-grade">${gradeLabel(val)}</div>
+      </div>`;
+  }
+
+  let sugHtml = '';
+  for(const s of suggestions){
+    sugHtml += `
+      <div class="suggestion-item ${s.type}">
+        <div class="suggestion-text">${s.text}</div>
+      </div>`;
+  }
+
+  let practiceHtml = '';
+  if(fb.practice_tip){
+    practiceHtml = `
+      <div class="suggestion-item tip" style="margin-top:14px;border-color:var(--accent);background:#fdf8fb;">
+        <div class="suggestion-text"><strong>Practice exercise:</strong> ${fb.practice_tip}</div>
+      </div>`;
+  }
+
+  const statsLine = `<div style="font-size:11px;color:var(--muted);margin-bottom:18px;letter-spacing:.1px;">
+    ${stats.piece || 'General practice'} &nbsp;·&nbsp; ${stats.duration}s recorded &nbsp;·&nbsp; ${stats.inTunePct}% in tune
+  </div>`;
+
+  document.getElementById('feedbackContent').innerHTML = `
+    ${statsLine}
+    <div class="score-grid">${scoresHtml}</div>
+    <div class="teacher-msg">${fb.overall_message || ''}</div>
+    <div class="suggestions">
+      <div class="suggestions-title">Feedback &amp; Suggestions</div>
+      ${sugHtml}
+      ${practiceHtml}
+    </div>`;
+}
+
+function renderError(e){
+  const msg = (e && e.message) ? e.message : String(e);
+
+  let help = '';
+  if(msg.includes('Invalid API key') || msg.includes('401')){
+    help = 'Check that you pasted the full key starting with <code>sk-</code> and that it has not been revoked.';
+  } else if(msg.includes('credits') || msg.includes('429') || msg.includes('quota')){
+    help = 'Add credits at <a href="https://platform.openai.com/settings/organization/billing" target="_blank" style="color:var(--accent);">platform.openai.com/billing</a>.';
+  } else if(msg.includes('fetch') || msg.includes('network') || msg.includes('Failed to fetch')){
+    help = 'Check your internet connection. If opening this as a <code>file://</code> page, serve it over HTTP (see the warning above).';
+  } else if(msg.includes('format') || msg.includes('JSON')){
+    help = 'The AI returned an unexpected response format. A retry was attempted. Try recording a slightly longer session.';
+  } else if(msg.includes('microphone') || msg.includes('Permission')){
+    help = 'Microphone permission was denied. Click the lock icon in your browser address bar and allow microphone access.';
+  }
+
+  document.getElementById('feedbackContent').innerHTML = `
+    <div class="error-item">
+      <div class="error-title">Feedback unavailable</div>
+      <div class="error-msg">${msg}</div>
+      ${help ? `<div class="error-help">${help}</div>` : ''}
+      <div class="error-help">Open DevTools (F12) and check the Console for full error details.</div>
+    </div>`;
+}
+
+// ══════════════════════════════════════════════
+//  Session history
+// ══════════════════════════════════════════════
+function addToHistory(fb, stats){
+  const entry = {
+    time: new Date().toLocaleTimeString(),
+    piece: stats.piece || 'General practice',
+    scores: fb.scores,
+    fb, stats
+  };
+  sessionHistory.unshift(entry);
+  renderHistory();
+}
+
+function renderHistory(){
+  if(!sessionHistory.length) return;
+  document.getElementById('historySection').style.display = 'block';
+  const list = document.getElementById('historyList');
+  list.innerHTML = sessionHistory.map((e,i)=>{
+    const scores = Object.values(e.scores||{});
+    const avg = scores.length ? Math.round(scores.reduce((a,b)=>a+b,0)/scores.length) : '?';
+    const pills = Object.entries(e.scores||{}).slice(0,3)
+      .map(([k,v])=>`<span class="hscore">${scoreName(k)} ${v}</span>`).join('');
+    return `<div class="history-item" onclick="showHistoryEntry(${i})">
+      <div>
+        <div class="history-piece">${e.piece}</div>
+        <div class="history-meta">${e.time} &nbsp;·&nbsp; ${e.stats.duration}s &nbsp;·&nbsp; Avg ${avg}/10</div>
+      </div>
+      <div class="history-scores">${pills}</div>
+    </div>`;
+  }).join('');
+}
+
+function showHistoryEntry(i){
+  const e = sessionHistory[i];
+  renderFeedback(e.fb, e.stats);
+  window.scrollTo({ top: document.querySelector('.feedback-area').offsetTop - 80, behavior:'smooth' });
+}
+</script>
+
+<!-- ═══════════════════════════════════════════
+     VIOLIN CHATBOT
+═══════════════════════════════════════════ -->
+<style>
+#vtChatBtn{
+  position:fixed;bottom:28px;right:28px;
+  width:56px;height:56px;border-radius:50%;
+  background:var(--accent);border:none;cursor:pointer;
+  box-shadow:0 6px 24px rgba(201,133,159,.45);
+  display:flex;align-items:center;justify-content:center;
+  z-index:1100;transition:transform .25s ease,box-shadow .25s ease;
+}
+#vtChatBtn:hover{transform:scale(1.08);box-shadow:0 10px 30px rgba(201,133,159,.55);}
+#vtChatBtn svg{width:26px;height:26px;fill:#fff;}
+#vtChatBadge{
+  position:absolute;top:-4px;right:-4px;
+  background:#c0392b;color:#fff;font-size:10px;font-weight:700;
+  width:18px;height:18px;border-radius:50%;display:none;
+  align-items:center;justify-content:center;font-family:Inter,sans-serif;
+}
+#vtChatPanel{
+  position:fixed;bottom:96px;right:28px;
+  width:370px;max-height:580px;
+  background:#fff;border-radius:20px;
+  box-shadow:0 20px 60px rgba(0,0,0,.15);
+  border:1px solid var(--border);
+  display:flex;flex-direction:column;
+  z-index:1100;
+  transform:translateY(20px) scale(.97);opacity:0;pointer-events:none;
+  transition:transform .3s ease,opacity .3s ease;
+}
+#vtChatPanel.open{transform:translateY(0) scale(1);opacity:1;pointer-events:all;}
+@media(max-width:430px){
+  #vtChatPanel{width:calc(100vw - 24px);right:12px;bottom:90px;}
+  #vtChatBtn{right:16px;bottom:16px;}
+}
+.vt-chat-header{
+  padding:16px 18px 14px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:10px;
+  border-radius:20px 20px 0 0;
+  background:linear-gradient(135deg,#fff8fb,#fff2f7);
+}
+.vt-chat-avatar{
+  width:36px;height:36px;border-radius:50%;
+  background:var(--accent);display:flex;align-items:center;justify-content:center;
+  font-size:18px;flex-shrink:0;
+}
+.vt-chat-header-info{flex:1;}
+.vt-chat-header-name{font-family:"Playfair Display",serif;font-size:15px;color:#7a4a62;font-weight:600;line-height:1.2;}
+.vt-chat-header-sub{font-size:11px;color:#b97a97;margin-top:1px;}
+.vt-chat-close{background:none;border:none;cursor:pointer;color:#c4a0b4;font-size:22px;line-height:1;padding:2px 4px;transition:color .2s;}
+.vt-chat-close:hover{color:#b97a97;}
+.vt-chat-messages{
+  flex:1;overflow-y:auto;padding:14px;
+  display:flex;flex-direction:column;gap:10px;scroll-behavior:smooth;
+}
+.vt-chat-messages::-webkit-scrollbar{width:4px;}
+.vt-chat-messages::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px;}
+.vt-msg{display:flex;gap:8px;align-items:flex-end;max-width:100%;}
+.vt-msg.user{flex-direction:row-reverse;}
+.vt-msg-bubble{
+  padding:10px 13px;border-radius:16px;
+  font-size:13px;line-height:1.6;max-width:78%;
+  font-family:Inter,sans-serif;word-break:break-word;
+}
+.vt-msg.bot .vt-msg-bubble{background:#fdf5f8;color:#3a2a34;border-radius:4px 16px 16px 16px;border:1px solid var(--border);}
+.vt-msg.user .vt-msg-bubble{background:var(--accent);color:#fff;border-radius:16px 4px 16px 16px;}
+.vt-msg-icon{width:28px;height:28px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:14px;}
+.vt-msg.bot .vt-msg-icon{background:#fdf0f5;}
+.vt-msg.user .vt-msg-icon{background:#f0cad9;}
+.vt-typing-bubble{background:#fdf5f8;border:1px solid var(--border);border-radius:4px 16px 16px 16px;padding:10px 14px;}
+.vt-typing-dots{display:flex;gap:4px;align-items:center;}
+.vt-typing-dots span{width:6px;height:6px;background:var(--accent);border-radius:50%;animation:vtdot .9s ease-in-out infinite;}
+.vt-typing-dots span:nth-child(2){animation-delay:.2s;}
+.vt-typing-dots span:nth-child(3){animation-delay:.4s;}
+@keyframes vtdot{0%,60%,100%{transform:translateY(0);}30%{transform:translateY(-6px);}}
+.vt-chat-suggestions{padding:8px 12px;display:flex;flex-wrap:wrap;gap:5px;border-top:1px solid var(--border);}
+.vt-chat-sugg{
+  padding:5px 10px;background:#fdf5f8;border:1px solid var(--border);
+  border-radius:20px;font-size:11px;color:#b97a97;cursor:pointer;
+  font-family:Inter,sans-serif;transition:background .2s;white-space:nowrap;
+}
+.vt-chat-sugg:hover{background:#fce8f0;color:var(--accent);}
+.vt-chat-input-row{
+  padding:10px 12px;border-top:1px solid var(--border);
+  display:flex;gap:8px;align-items:flex-end;
+  border-radius:0 0 20px 20px;background:#fff;
+}
+.vt-chat-input{
+  flex:1;padding:9px 12px;border-radius:12px;
+  border:1.5px solid var(--border);font-size:13px;
+  font-family:Inter,sans-serif;outline:none;resize:none;
+  max-height:100px;line-height:1.5;color:var(--text);
+  transition:border .2s;background:#fdfbfc;
+}
+.vt-chat-input:focus{border-color:var(--accent);}
+.vt-chat-send{
+  width:36px;height:36px;border-radius:50%;
+  background:var(--accent);border:none;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;transition:opacity .2s;
+}
+.vt-chat-send:hover{opacity:.88;}
+.vt-chat-send svg{width:16px;height:16px;fill:#fff;}
+.vt-chat-send:disabled{opacity:.4;cursor:default;}
+</style>
+
+<!-- Floating chat button -->
+<button id="vtChatBtn" onclick="vtToggleChat()" aria-label="Open violin chatbot">
+  <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12c0 1.85.5 3.58 1.37 5.07L2 22l5.12-1.34A9.94 9.94 0 0012 22c5.52 0 10-4.48 10-10S17.52 2 12 2zm1 14H7v-2h6v2zm2-4H7V10h8v2zm0-4H7V6h8v2z"/></svg>
+  <div id="vtChatBadge"></div>
+</button>
+
+<!-- Chat panel -->
+<div id="vtChatPanel">
+  <div class="vt-chat-header">
+    <div class="vt-chat-avatar"><img src="hailey-portrait.jpg" alt="Hailey" style="width:36px;height:36px;border-radius:50%;object-fit:cover;object-position:top center;"/></div>
+    <div class="vt-chat-header-info">
+      <div class="vt-chat-header-name">Strings Assistant</div>
+      <div class="vt-chat-header-sub">Violin questions answered</div>
+    </div>
+    <button class="vt-chat-close" onclick="vtToggleChat()">&#x2715;</button>
+  </div>
+  <div class="vt-chat-messages" id="vtChatMessages">
+    <div class="vt-msg bot">
+      <div class="vt-msg-icon">🎻</div>
+      <div class="vt-msg-bubble">Welcome to Haileyonstrings! Ask my AI Violin Assistant anything about the violin from playing techniques, practice tips, and music theory to repertoire, famous composers, performance advice, and instrument care.</div>
+    </div>
+  </div>
+  <div class="vt-chat-suggestions" id="vtChatSuggestions">
+    <span class="vt-chat-sugg" onclick="vtSendSugg(this)">How do I hold the bow?</span>
+    <span class="vt-chat-sugg" onclick="vtSendSugg(this)">Tips for intonation</span>
+    <span class="vt-chat-sugg" onclick="vtSendSugg(this)">What is vibrato?</span>
+    <span class="vt-chat-sugg" onclick="vtSendSugg(this)">How long should I practise?</span>
+  </div>
+  <div class="vt-chat-input-row">
+    <textarea class="vt-chat-input" id="vtChatInput" rows="1" placeholder="Ask a violin question…"
+      onkeydown="vtHandleKey(event)" oninput="vtAutoResize(this)"></textarea>
+    <button class="vt-chat-send" id="vtChatSendBtn" onclick="vtSendMessage()" aria-label="Send">
+      <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+    </button>
+  </div>
+</div>
+
+<script>
+// ── Violin Teacher page chatbot ──
+const vtChatKey = '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';
+let vtChatHistory = [];
+let vtChatOpen = false;
+let vtChatUnread = 0;
+
+const VT_SYSTEM_PROMPT = `You are the Strings Assistant on Haileyonstrings.com — a warm, knowledgeable, and encouraging violin expert.
+You help Hailey (a young beginner violinist from Singapore, started 2025) and any visitor with violin-related questions.
+Topics you cover: technique (bowing, intonation, posture, shifting, vibrato), practice strategies, music theory,
+violin repertoire, composers, Suzuki method, string care & maintenance, buying instruments, performance tips.
+Keep answers friendly, clear, and encouraging. For beginners, use simple language.
+If a question is completely unrelated to music or violin, kindly redirect back to violin topics.
+Format your responses in plain text — no markdown, no bullet symbols like * or -.`;
+
+function vtToggleChat(){
+  vtChatOpen = !vtChatOpen;
+  document.getElementById('vtChatPanel').classList.toggle('open', vtChatOpen);
+  if(vtChatOpen){
+    vtChatUnread = 0;
+    document.getElementById('vtChatBadge').style.display = 'none';
+    setTimeout(()=>{ document.getElementById('vtChatInput').focus(); }, 320);
+    vtScrollChat();
+  }
+}
+function vtHandleKey(e){ if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); vtSendMessage(); } }
+function vtAutoResize(el){ el.style.height='auto'; el.style.height=Math.min(el.scrollHeight,100)+'px'; }
+function vtSendSugg(el){
+  document.getElementById('vtChatInput').value = el.textContent;
+  document.getElementById('vtChatSuggestions').style.display = 'none';
+  vtSendMessage();
+}
+function vtScrollChat(){
+  const box = document.getElementById('vtChatMessages');
+  setTimeout(()=>{ box.scrollTop = box.scrollHeight; }, 50);
+}
+function vtEscHtml(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br/>'); }
+function vtAppendMsg(role, text){
+  const box = document.getElementById('vtChatMessages');
+  const div = document.createElement('div');
+  div.className = 'vt-msg ' + role;
+  div.innerHTML = role==='bot'
+    ? `<div class="vt-msg-icon">🎻</div><div class="vt-msg-bubble">${vtEscHtml(text)}</div>`
+    : `<div class="vt-msg-bubble">${vtEscHtml(text)}</div><div class="vt-msg-icon" style="background:#f0cad9;">♪</div>`;
+  box.appendChild(div);
+  vtScrollChat();
+  if(!vtChatOpen){
+    vtChatUnread++;
+    const badge = document.getElementById('vtChatBadge');
+    badge.textContent = vtChatUnread;
+    badge.style.display = 'flex';
+  }
+}
+function vtShowTyping(){
+  const box = document.getElementById('vtChatMessages');
+  const div = document.createElement('div');
+  div.className='vt-msg bot'; div.id='vtTypingIndicator';
+  div.innerHTML=`<div class="vt-msg-icon">🎻</div><div class="vt-typing-bubble"><div class="vt-typing-dots"><span></span><span></span><span></span></div></div>`;
+  box.appendChild(div); vtScrollChat();
+}
+function vtHideTyping(){ const el=document.getElementById('vtTypingIndicator'); if(el) el.remove(); }
+
+async function vtSendMessage(){
+  const input = document.getElementById('vtChatInput');
+  const text = input.value.trim();
+  if(!text) return;
+  input.value = ''; input.style.height = 'auto';
+  document.getElementById('vtChatSuggestions').style.display = 'none';
+  document.getElementById('vtChatSendBtn').disabled = true;
+  vtAppendMsg('user', text);
+  vtChatHistory.push({ role:'user', content:text });
+  vtShowTyping();
+  try {
+    const res = await fetch('https://api.openai.com/v1/chat/completions',{
+      method:'POST',
+      headers:{ 'Authorization':'Bearer '+vtChatKey, 'Content-Type':'application/json' },
+      body: JSON.stringify({
+        model:'gpt-4o',
+        messages:[ { role:'system', content:VT_SYSTEM_PROMPT }, ...vtChatHistory.slice(-10) ],
+        temperature:0.7, max_tokens:400
+      })
+    });
+    vtHideTyping();
+    if(!res.ok){
+      const err = await res.json().catch(()=>({}));
+      const msg = res.status===401 ? 'Invalid API key.'
+                : res.status===429 ? 'Rate limit reached. Add credits at platform.openai.com/billing.'
+                : (err.error?.message||'Something went wrong. Please try again.');
+      vtAppendMsg('bot', msg);
+    } else {
+      const data = await res.json();
+      const reply = data.choices[0].message.content.trim();
+      vtChatHistory.push({ role:'assistant', content:reply });
+      vtAppendMsg('bot', reply);
+    }
+  } catch(e){
+    vtHideTyping();
+    vtAppendMsg('bot','Network error — please check your connection and try again.');
+  }
+  document.getElementById('vtChatSendBtn').disabled = false;
+}
+</script>
+
+</body>
+</html>
