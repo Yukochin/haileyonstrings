@@ -728,9 +728,9 @@ filter:drop-shadow(0 2px 6px rgba(216,154,178,.35));
   <!-- OpenAI API Key Setup -->
   <div class="card" id="setupCard" style="margin-top:16px;">
     <div class="card-title">Connect AI Violin Teacher</div>
-    <p class="api-note">This tool uses the OpenAI API to analyse your playing. Your key is stored only in this browser session and is sent directly to OpenAI — never to any other server.</p>
+    <p class="api-note">This tool uses the Watsonx.ai API to analyse your playing. Your key is stored only in this browser session and is sent directly to OpenAI — never to any other server.</p>
     <div class="input-row">
-      <input class="api-input" id="apiKeyInput" type="password" placeholder="sk-…  paste your OpenAI API key here"/>
+      <input class="api-input" id="apiKeyInput" type="password" placeholder="sk-…  paste your Watsonx.ai API key here"/>
       <button class="save-btn" onclick="saveApiKey()">Connect</button>
     </div>
     <div class="api-status" id="apiStatus"></div>
@@ -772,7 +772,7 @@ let liveStats = { pitchSamples:[], volSamples:[], noteNames:[], silenceCount:0, 
 function saveApiKey(){
   const val = document.getElementById('apiKeyInput').value.trim();
   if(!val.startsWith('sk-')){
-    setApiStatus('Please enter a valid OpenAI API key (starts with sk-…)', 'err'); return;
+    setApiStatus('Please enter a valid API key (starts with sk-…)', 'err'); return;
   }
   apiKey = val;
   sessionStorage.setItem('oai_key', val);
@@ -796,7 +796,7 @@ async function testApiKey(key){
     if(!r.ok){ setApiStatus('⚠️ API key accepted but server returned: '+r.status,'err'); return; }
     setApiStatus('✓ API key verified — AI teacher is ready!','ok');
   } catch(e){
-    setApiStatus('⚠️ Could not reach OpenAI. Check your internet connection.','err');
+    setApiStatus('⚠️ Could not reach Watsonx.ai. Check your internet connection.','err');
   }
 }
 function setApiStatus(msg, cls){
@@ -1131,7 +1131,7 @@ async function toggleRecording(){
   if(isRecording){ stopRecording(); return; }
 
   if(!apiKey){
-    alert('Please enter your OpenAI API key first to enable AI feedback.');
+    alert('Please enter your API key first to enable AI feedback.');
     document.getElementById('apiKeyInput').focus();
     return;
   }
