@@ -1,0 +1,1995 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>AI Violin Teacher | Haileyonstrings</title>
+<link href="https://fonts.googleapis.com/css2?family=Tangerine:wght@400;700&family=Playfair+Display:wght@600;700&family=Cormorant+Infant:ital,wght@1,500;1,600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/vexflow@4.2.2/build/cjs/vexflow.js"></script>
+<style>
+:root{
+  --accent:#c9859f;--accent2:#f7e8ef;--text:#2a2a2a;--bg:#fdfbfc;
+  --green:#2d8a5e;--red:#c0392b;--amber:#b07d2a;--blue:#2f6fbe;
+  --surface:#ffffff;--border:#e8d6de;--muted:#7a6470;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  font-family:Inter,sans-serif;color:var(--text);line-height:1.7;min-height:100vh;
+  background:url('Background1.jpeg') center center / cover fixed no-repeat;
+}
+body::before{
+  content:'';position:fixed;inset:0;
+  background:rgba(255,248,251,.72);backdrop-filter:blur(2px);
+  z-index:0;pointer-events:none;
+}
+.main,.nav-inner{position:relative;z-index:1;}
+
+/* ── Nav ── */
+nav{
+  position:fixed;top:0;width:100%;
+  padding:14px 6%;display:flex;justify-content:space-between;align-items:center;
+  background:rgba(255,245,249,.88);backdrop-filter:blur(22px);
+  border-bottom:1px solid rgba(232,214,222,.7);
+  box-shadow:0 4px 24px rgba(201,133,159,.10);z-index:999;
+}
+.logo{font-family:"Playfair Display";font-size:22px;color:var(--accent);text-decoration:none;}
+.back-btn{
+  text-decoration:none;color:var(--muted);
+  font-family:"Cormorant Infant",serif;font-style:italic;font-weight:500;font-size:20px;
+  padding:7px 16px;border-radius:6px;border:1px solid var(--border);
+  transition:background .2s;white-space:nowrap;
+}
+.back-btn:hover{background:#f5eff2;}
+@media(max-width:500px){nav{padding:12px 4%;}.logo{font-size:18px;}.back-btn{font-size:18px;padding:6px 12px;}}
+
+/* ── Main layout ── */
+.main{max-width:900px;margin:0 auto;padding:88px 24px 60px;position:relative;z-index:1;overflow:visible;}
+
+/* ── Page header ── */
+.page-header{margin-bottom:32px;border-bottom:1px solid var(--border);padding-bottom:24px;text-align:center;}
+.page-header h1{font-family:"Tangerine",cursive;font-size:80px;color:var(--accent);font-weight:700;line-height:1;margin-bottom:6px;}
+.page-header h1 em{font-style:italic;color:var(--accent);}
+.page-header p{font-family:"Cormorant Infant",serif;font-style:italic;font-size:22px;color:#8b6477;line-height:1.7;}
+.page-header-badges{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:10px;}
+.header-badge{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;color:var(--muted);background:rgba(201,133,159,.07);border:1px solid var(--border);padding:4px 11px;border-radius:20px;}
+
+/* ── Instrument Selector ── */
+.instrument-selector{text-align:center;margin-bottom:28px;}
+.instrument-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:12px;}
+.instrument-tabs{display:inline-flex;background:rgba(255,245,249,.88);border:1px solid var(--border);border-radius:50px;padding:4px;gap:4px;}
+.instrument-tab{
+  padding:10px 28px;border-radius:50px;border:none;cursor:pointer;
+  font-family:"Cormorant Infant",serif;font-style:italic;font-size:19px;
+  display:flex;align-items:center;gap:8px;
+  background:transparent;color:var(--muted);transition:all .25s;
+}
+.instrument-tab:hover{color:var(--text);}
+.instrument-tab.active{background:var(--accent);color:#fff;box-shadow:0 4px 16px rgba(201,133,159,.35);}
+
+/* ── Flow wrap (session setup) ── */
+.flow-wrap{background:rgba(255,255,255,.82);border:1px solid rgba(232,214,222,.7);border-radius:14px;padding:24px 26px;margin-bottom:16px;box-shadow:0 8px 32px rgba(201,133,159,.10);backdrop-filter:blur(8px);overflow:visible;}
+.flow-title{font-family:"Cormorant Infant",serif;font-style:italic;font-size:22px;font-weight:500;color:#8b5d73;margin-bottom:20px;display:flex;align-items:center;gap:10px;}
+.flow-title::before{content:'';width:3px;height:18px;border-radius:3px;background:linear-gradient(180deg,var(--accent),#f0b8cc);flex-shrink:0;}
+.flow-step{display:flex;align-items:flex-start;gap:14px;margin-bottom:18px;}
+.flow-step:last-child{margin-bottom:0;}
+.step-num-badge{width:26px;height:26px;border-radius:50%;flex-shrink:0;background:rgba(201,133,159,.12);border:1px solid rgba(201,133,159,.3);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--accent);margin-top:2px;}
+.flow-step-body{flex:1;}
+.flow-step-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);margin-bottom:8px;}
+
+/* ── Section label ── */
+.section-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.9px;color:var(--muted);margin-bottom:8px;}
+
+/* ── Cards ── */
+.card{background:rgba(255,255,255,.82);border:1px solid rgba(232,214,222,.7);border-radius:14px;padding:24px 26px;margin-bottom:16px;box-shadow:0 8px 32px rgba(201,133,159,.10);backdrop-filter:blur(8px);overflow:visible;}
+.card-title{font-family:"Cormorant Infant",serif;font-style:italic;font-size:20px;font-weight:500;color:#8b5d73;margin-bottom:14px;}
+
+/* ── API key ── */
+.input-row{display:flex;gap:8px;align-items:center;}
+.api-input{flex:1;padding:9px 13px;border-radius:7px;border:1px solid var(--border);font-size:13px;font-family:Inter,sans-serif;background:#fdfbfc;color:var(--text);outline:none;transition:border .2s;}
+.api-input:focus{border-color:var(--accent);}
+.save-btn{padding:9px 18px;background:var(--accent);color:#fff;border:none;border-radius:7px;font-family:"Cormorant Infant",serif;font-style:italic;font-size:19px;cursor:pointer;transition:opacity .2s;white-space:nowrap;}
+.save-btn:hover{opacity:.88;}
+.api-status{font-size:12px;margin-top:8px;}
+.api-status.ok{color:var(--green);}
+.api-status.err{color:var(--red);}
+.api-note{font-family:"Cormorant Infant",serif;font-style:italic;font-size:19px;line-height:1.85;color:var(--muted);margin-bottom:14px;}
+
+/* ── Controls grid ── */
+.controls{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;overflow:visible;position:relative;z-index:10;}
+@media(max-width:600px){.controls{grid-template-columns:1fr;}}
+
+/* Piece selector */
+.piece-select{width:100%;padding:9px 12px;border-radius:7px;border:1px solid var(--border);font-family:"Cormorant Infant",serif;font-style:italic;font-size:19px;background:#fdfbfc;color:var(--text);outline:none;cursor:pointer;}
+
+/* Focus toggles */
+.toggle-grid{display:flex;flex-wrap:wrap;gap:6px;}
+.toggle{padding:5px 13px;border-radius:5px;border:1px solid var(--border);font-family:"Cormorant Infant",serif;font-style:italic;font-size:19px;cursor:pointer;background:#fff;color:var(--muted);transition:all .2s;user-select:none;}
+.toggle.active{background:var(--accent);color:#fff;border-color:var(--accent);}
+
+/* ── Mode tab switcher ── */
+.mode-tabs{display:flex;background:rgba(255,245,249,.88);border:1px solid var(--border);border-radius:12px;padding:4px;margin-bottom:20px;gap:4px;}
+.mode-tab{flex:1;padding:10px 14px;border-radius:9px;border:none;cursor:pointer;font-family:"Cormorant Infant",serif;font-style:italic;font-size:19px;display:flex;align-items:center;justify-content:center;gap:7px;background:transparent;color:var(--muted);transition:all .25s;}
+.mode-tab:hover{color:var(--text);background:rgba(201,133,159,.06);}
+.mode-tab.active{background:var(--accent);color:#fff;box-shadow:0 4px 16px rgba(201,133,159,.3);}
+.mode-tab svg{width:15px;height:15px;fill:currentColor;flex-shrink:0;}
+
+/* ── Upload zone ── */
+.upload-zone{border:2px dashed rgba(201,133,159,.35);border-radius:14px;padding:44px 28px;text-align:center;cursor:pointer;background:rgba(255,245,249,.4);transition:all .28s;position:relative;backdrop-filter:blur(10px);}
+.upload-zone:hover,.upload-zone.dragover{border-color:var(--accent);background:rgba(201,133,159,.1);}
+.upload-icon{width:56px;height:56px;border-radius:50%;background:rgba(201,133,159,.1);border:1px solid rgba(201,133,159,.25);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;transition:all .25s;}
+.upload-zone:hover .upload-icon,.upload-zone.dragover .upload-icon{background:rgba(201,133,159,.2);transform:scale(1.08);}
+.upload-icon svg{width:24px;height:24px;fill:var(--accent);}
+.upload-title{font-family:"Cormorant Infant",serif;font-style:italic;font-size:22px;color:#8b5d73;margin-bottom:6px;}
+.upload-sub{font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:16px;}
+.upload-formats{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;}
+.upload-fmt{font-size:11px;font-weight:700;padding:3px 10px;border-radius:10px;background:rgba(201,133,159,.08);border:1px solid rgba(201,133,159,.2);color:var(--accent);}
+.upload-file-info{display:none;align-items:center;gap:12px;background:rgba(255,245,249,.8);border:1px solid rgba(201,133,159,.2);border-radius:10px;padding:14px 18px;margin-top:14px;text-align:left;}
+.upload-file-icon{font-size:24px;flex-shrink:0;}
+.upload-file-name{font-size:14px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:220px;}
+.upload-file-size{font-size:11px;color:var(--muted);margin-top:2px;}
+.upload-file-actions{display:flex;gap:8px;margin-left:auto;flex-shrink:0;}
+.upload-analyse-btn{padding:8px 18px;background:var(--accent);color:#fff;border:none;border-radius:7px;font-size:13px;font-family:Inter,sans-serif;font-weight:600;cursor:pointer;transition:all .25s;white-space:nowrap;}
+.upload-analyse-btn:hover{opacity:.88;}
+.upload-analyse-btn:disabled{opacity:.5;cursor:default;}
+.upload-clear-btn{padding:8px 13px;background:rgba(192,57,43,.1);color:var(--red);border:1px solid rgba(192,57,43,.2);border-radius:7px;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;font-family:Inter,sans-serif;}
+.upload-clear-btn:hover{background:rgba(192,57,43,.2);}
+.upload-progress{height:4px;background:rgba(201,133,159,.15);border-radius:4px;margin-top:10px;overflow:hidden;display:none;}
+.upload-progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),#f0b8cc);border-radius:4px;transition:width .3s ease;width:0%;}
+.upload-status{font-size:12px;color:var(--muted);margin-top:8px;min-height:18px;text-align:center;}
+
+/* ── Record + Camera layout ── */
+.record-camera-row{display:flex;gap:16px;margin-bottom:20px;align-items:stretch;}
+@media(max-width:700px){.record-camera-row{flex-direction:column;}}
+
+/* ── Record area ── */
+.record-area{
+  background:rgba(255,255,255,.82);border:1px solid rgba(232,214,222,.7);
+  border-radius:14px;padding:28px 20px;text-align:center;
+  box-shadow:0 8px 32px rgba(201,133,159,.10);backdrop-filter:blur(8px);
+  position:relative;z-index:1;flex:1;min-width:0;max-width:360px;
+}
+/* Audio device selector */
+.device-select-row{display:flex;align-items:center;gap:10px;margin-bottom:6px;flex-wrap:wrap;}
+.device-select-label{font-size:12px;font-weight:700;color:var(--muted);white-space:nowrap;min-width:100px;}
+.device-select-ctrl{flex:1;min-width:180px;padding:8px 12px;border-radius:8px;border:1px solid var(--border);background:#fdfbfc;color:var(--text);font-size:13px;font-family:Inter,sans-serif;cursor:pointer;outline:none;transition:border .2s;}
+.device-select-ctrl:focus{border-color:var(--accent);}
+.device-refresh-btn{padding:8px 14px;background:rgba(201,133,159,.1);color:var(--accent);border:1px solid rgba(201,133,159,.3);border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:Inter,sans-serif;transition:all .2s;flex-shrink:0;}
+.device-refresh-btn:hover{background:rgba(201,133,159,.2);}
+.device-hint{font-size:11px;color:var(--muted);margin-bottom:16px;line-height:1.5;}
+.device-hint strong{color:var(--accent);}
+
+.record-btn{
+  width:88px;height:88px;border-radius:50%;border:none;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;flex-direction:column;gap:4px;
+  font-size:11px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;
+  transition:all .28s ease;position:relative;margin:0 auto 16px;
+}
+.record-btn.idle{background:linear-gradient(135deg,var(--accent),#e8a0bc);color:#fff;box-shadow:0 6px 28px rgba(201,133,159,.4);}
+.record-btn.idle:hover{transform:scale(1.07);box-shadow:0 10px 36px rgba(201,133,159,.55);}
+.record-btn.recording{background:linear-gradient(135deg,#8b1a1a,#c0392b);color:#fff;animation:pulse-btn 1.5s ease-in-out infinite;}
+.record-btn.analyzing{background:linear-gradient(135deg,#7a5a10,var(--amber));color:#fff;cursor:default;}
+.record-btn.recording::after{content:'';position:absolute;inset:-8px;border-radius:50%;border:2px solid rgba(192,57,43,.5);animation:ring-pulse 1.5s ease-out infinite;}
+@keyframes ring-pulse{0%{transform:scale(1);opacity:.8;}100%{transform:scale(1.4);opacity:0;}}
+@keyframes pulse-btn{0%,100%{box-shadow:0 0 0 0 rgba(192,57,43,.4);}50%{box-shadow:0 0 0 12px rgba(192,57,43,.0);}}
+.record-btn svg{width:26px;height:26px;fill:currentColor;}
+.record-dot{width:8px;height:8px;border-radius:50%;background:currentColor;}
+.recording .record-dot{animation:blink 1s step-start infinite;}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:.2;}}
+@keyframes spin-icon{to{transform:rotate(360deg);}}
+.record-hint{font-family:"Cormorant Infant",serif;font-style:italic;font-size:19px;line-height:1.85;color:var(--muted);margin-top:12px;}
+.timer{font-size:20px;font-weight:600;color:var(--accent);margin-top:10px;min-height:28px;}
+
+/* ── Live meters ── */
+.meters{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px;}
+@media(max-width:500px){.meters{grid-template-columns:1fr 1fr;}}
+.meter{background:#faf5f7;border:1px solid var(--border);border-radius:8px;padding:10px 12px;text-align:center;}
+.meter-label{font-size:10px;text-transform:uppercase;letter-spacing:.7px;color:var(--muted);margin-bottom:4px;}
+.meter-value{font-size:17px;font-weight:700;color:var(--accent);}
+.meter-value.green{color:var(--green);}
+.meter-value.amber{color:var(--amber);}
+.meter-value.red{color:var(--red);}
+.meter-sub{font-size:10px;color:#b0909a;margin-top:2px;}
+.pitch-bar-wrap{margin-top:12px;}
+.pitch-bar-label{font-size:11px;color:var(--muted);margin-bottom:5px;text-align:left;}
+.pitch-bar-track{height:8px;background:#ede0e5;border-radius:8px;overflow:hidden;position:relative;}
+.pitch-bar-fill{height:100%;border-radius:8px;background:linear-gradient(90deg,var(--green),var(--amber),var(--red));transition:width .15s ease;}
+.pitch-center-line{position:absolute;left:50%;top:0;width:2px;height:100%;background:rgba(0,0,0,.18);transform:translateX(-50%);}
+.waveform-wrap{margin-top:12px;}
+canvas#waveform{width:100%;height:52px;border-radius:8px;background:#faf5f7;display:block;}
+
+/* ── Playback panel ── */
+.playback-panel{background:rgba(255,255,255,.82);border:1px solid rgba(232,214,222,.7);border-radius:12px;padding:16px 20px;margin-bottom:20px;backdrop-filter:blur(10px);}
+.playback-header{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.playback-title{display:flex;align-items:center;gap:7px;font-family:"Cormorant Infant",serif;font-style:italic;font-size:18px;font-weight:500;color:var(--accent);flex:1;}
+.playback-meta{font-size:12px;color:var(--muted);}
+.playback-discard{background:none;border:1px solid rgba(192,57,43,.3);color:var(--red);border-radius:6px;padding:4px 10px;font-size:12px;cursor:pointer;font-family:Inter,sans-serif;transition:background .15s;}
+.playback-discard:hover{background:rgba(192,57,43,.1);}
+audio{border-radius:8px;accent-color:var(--accent);}
+
+/* ── Webcam panel ── */
+.webcam-panel{background:rgba(255,255,255,.82);border:1px solid rgba(232,214,222,.7);border-radius:14px;flex:2;min-width:0;display:flex;flex-direction:column;box-shadow:0 8px 32px rgba(201,133,159,.10);backdrop-filter:blur(8px);}
+@media(max-width:700px){.webcam-panel{flex:none;width:100%;}}
+.webcam-toggle-row{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;cursor:pointer;user-select:none;border-bottom:1px solid var(--border);}
+.webcam-toggle-label{display:flex;align-items:center;gap:9px;font-family:"Cormorant Infant",serif;font-style:italic;font-size:18px;color:var(--accent);}
+.webcam-body{flex:1;padding:12px 14px 14px;display:flex;flex-direction:column;gap:10px;}
+.webcam-video-wrap{position:relative;border-radius:10px;overflow:hidden;background:#f5eff2;width:100%;flex:1;min-height:180px;}
+#webcamVideo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;}
+.webcam-overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;font-size:12px;color:rgba(90,50,70,.6);background:rgba(255,245,249,.75);text-align:center;padding:16px;}
+.webcam-controls-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.webcam-start-btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;background:var(--accent);color:#fff;border:none;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer;transition:all .25s;font-family:Inter,sans-serif;white-space:nowrap;flex:1;justify-content:center;}
+.webcam-start-btn:hover{opacity:.88;}
+.webcam-start-btn.active{background:rgba(192,57,43,.8);border:none;}
+.webcam-start-btn:disabled{opacity:.45;cursor:default;}
+.webcam-hint{font-size:11px;color:var(--muted);line-height:1.55;}
+.webcam-snapshot-strip{display:flex;gap:5px;flex-wrap:wrap;}
+.webcam-snapshot{width:56px;height:42px;border-radius:5px;object-fit:cover;border:1px solid var(--border);cursor:pointer;transition:transform .15s;}
+.webcam-snapshot:hover{transform:scale(1.08);}
+canvas#snapshotCanvas{display:none;}
+
+/* ── Feedback area ── */
+.feedback-area{background:rgba(255,255,255,.82);border:1px solid rgba(232,214,222,.7);border-radius:14px;padding:26px 28px;box-shadow:0 8px 32px rgba(201,133,159,.10);backdrop-filter:blur(8px);}
+.feedback-area h2{font-family:"Cormorant Infant",serif;font-style:italic;font-size:26px;color:#8b5d73;margin-bottom:20px;padding-bottom:14px;border-bottom:1px solid var(--border);}
+
+/* ── Posture card ── */
+.posture-card{background:rgba(255,255,255,.82);border:1px solid rgba(232,214,222,.7);border-radius:14px;padding:22px 24px;margin-bottom:16px;box-shadow:0 8px 32px rgba(201,133,159,.10);backdrop-filter:blur(8px);}
+.posture-card-header{display:flex;align-items:center;gap:10px;margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--border);}
+.posture-card-icon{width:34px;height:34px;border-radius:50%;flex-shrink:0;background:rgba(201,133,159,.12);border:1px solid rgba(201,133,159,.25);display:flex;align-items:center;justify-content:center;font-size:17px;}
+.posture-card-title{font-family:"Cormorant Infant",serif;font-style:italic;font-size:20px;font-weight:500;color:#8b5d73;flex:1;}
+.posture-card-badge{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;padding:3px 9px;border-radius:10px;background:rgba(201,133,159,.1);border:1px solid rgba(201,133,159,.25);color:var(--accent);}
+.posture-score-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin-bottom:16px;}
+.posture-score-badge{border-radius:8px;padding:12px 10px;text-align:center;border:1px solid var(--border);background:#fdfbfc;}
+.posture-score-badge .pb-name{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:6px;}
+.posture-score-badge .pb-val{font-family:"Playfair Display",serif;font-size:24px;font-weight:700;line-height:1;}
+.posture-score-badge .pb-grade{font-size:10px;margin-top:4px;color:var(--muted);}
+.posture-obs-list{list-style:none;padding:0;margin:0 0 14px;}
+.posture-obs-list li{display:flex;align-items:flex-start;gap:8px;padding:9px 12px;margin-bottom:5px;border-radius:7px;font-size:13px;line-height:1.6;border-left:3px solid;}
+.posture-obs-list li.good{border-color:var(--green);background:#f4fbf7;}
+.posture-obs-list li.tip{border-color:var(--blue);background:#f4f7fd;}
+.posture-obs-list li.warn{border-color:var(--amber);background:#fdf9f0;}
+.posture-snapshot-row{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;}
+.posture-snapshot-thumb{width:80px;height:60px;border-radius:6px;object-fit:cover;border:1px solid var(--border);}
+.posture-overall-msg{font-family:"Cormorant Infant",serif;font-style:italic;font-size:17px;line-height:1.75;color:#7a4a62;margin-bottom:0;}
+.posture-empty{text-align:center;padding:32px 16px;font-family:"Cormorant Infant",serif;font-style:italic;font-size:17px;color:#c4a0b4;line-height:1.7;}
+
+/* ── Score badges ── */
+.score-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin-bottom:22px;}
+.score-badge{border-radius:8px;padding:14px 10px;text-align:center;border:1px solid var(--border);background:#fdfbfc;}
+.score-badge .badge-name{font-family:Inter,sans-serif;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:8px;}
+.score-badge .badge-score{font-family:"Playfair Display",serif;font-size:28px;font-weight:700;line-height:1;}
+.score-badge .badge-grade{font-size:10px;margin-top:5px;color:var(--muted);}
+.score-excellent .badge-score,.posture-score-badge.score-excellent .pb-val{color:var(--green);}
+.score-good      .badge-score,.posture-score-badge.score-good .pb-val     {color:var(--blue);}
+.score-fair      .badge-score,.posture-score-badge.score-fair .pb-val     {color:var(--amber);}
+.score-poor      .badge-score,.posture-score-badge.score-poor .pb-val     {color:var(--red);}
+
+/* Teacher message */
+.teacher-msg{background:#fdf8fb;border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:0 8px 8px 0;padding:20px 22px;margin-bottom:20px;font-family:"Cormorant Infant",serif;font-style:italic;font-size:19px;line-height:1.85;color:#7a4a62;}
+
+/* Suggestions */
+.suggestions-title{font-family:"Cormorant Infant",serif;font-style:italic;font-size:18px;font-weight:500;color:#8b5d73;margin-bottom:12px;}
+.suggestion-item{display:flex;gap:0;align-items:flex-start;padding:11px 14px;margin-bottom:6px;border-radius:7px;border-left:3px solid;}
+.suggestion-item.tip   {border-color:var(--blue);background:#f4f7fd;}
+.suggestion-item.warn  {border-color:var(--amber);background:#fdf9f0;}
+.suggestion-item.praise{border-color:var(--green);background:#f4fbf7;}
+.suggestion-text{font-family:Inter,sans-serif;font-size:13px;line-height:1.65;color:#3a2e34;}
+
+/* Email to parent */
+.email-parent-bar{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-top:22px;padding-top:18px;border-top:1px solid var(--border);}
+.email-parent-bar-label{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px;}
+.btn-email-parent{display:inline-flex;align-items:center;gap:8px;padding:10px 20px;background:rgba(201,133,159,.1);border:1.5px solid rgba(201,133,159,.35);border-radius:8px;color:var(--accent);font-size:13px;font-weight:700;cursor:pointer;font-family:Inter,sans-serif;transition:all .25s;}
+.btn-email-parent:hover{background:rgba(201,133,159,.2);border-color:var(--accent);transform:translateY(-1px);}
+.btn-email-parent:disabled{opacity:.5;cursor:default;transform:none;}
+
+/* Next-step chips */
+.next-step-row{margin-top:18px;padding-top:16px;border-top:1px solid var(--border);}
+.next-step-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);margin-bottom:10px;}
+.next-step-chips{display:flex;flex-wrap:wrap;gap:8px;}
+.next-chip{padding:7px 14px;border-radius:20px;font-size:12px;font-weight:600;border:1px solid;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:6px;}
+.next-chip.harder{background:rgba(176,125,42,.1);border-color:rgba(176,125,42,.35);color:var(--amber);}
+.next-chip.harder:hover{background:rgba(176,125,42,.2);}
+.next-chip.easier{background:rgba(47,111,190,.1);border-color:rgba(47,111,190,.35);color:var(--blue);}
+.next-chip.easier:hover{background:rgba(47,111,190,.2);}
+.next-chip.related{background:rgba(201,133,159,.1);border-color:rgba(201,133,159,.28);color:var(--accent);}
+.next-chip.related:hover{background:rgba(201,133,159,.2);}
+
+/* Empty state */
+.empty-state{text-align:center;padding:40px 20px;font-family:"Cormorant Infant",serif;font-style:italic;font-size:18px;color:#c4a0b4;line-height:1.7;}
+.empty-state-title{font-family:"Cormorant Infant",serif;font-style:italic;font-size:22px;color:#b09aa8;margin-bottom:8px;}
+
+/* Thinking */
+.thinking{display:flex;align-items:center;gap:10px;justify-content:center;padding:32px;}
+.thinking span{font-family:"Cormorant Infant",serif;font-style:italic;font-size:16px;color:#a08090;}
+.dot-wave{display:flex;gap:4px;}
+.dot-wave div{width:6px;height:6px;border-radius:50%;background:var(--accent);animation:wave .9s ease-in-out infinite;}
+.dot-wave div:nth-child(2){animation-delay:.15s;}
+.dot-wave div:nth-child(3){animation-delay:.3s;}
+@keyframes wave{0%,60%,100%{transform:translateY(0);}30%{transform:translateY(-7px);}}
+
+/* Session history */
+.history-section{margin-top:16px;}
+.history-section h3{font-family:"Cormorant Infant",serif;font-style:italic;font-size:18px;font-weight:500;color:#8b5d73;margin-bottom:10px;}
+.history-item{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-radius:8px;border:1px solid var(--border);margin-bottom:6px;cursor:pointer;transition:background .15s;background:var(--surface);}
+.history-item:hover{background:#fdf5f8;}
+.history-meta{font-size:11px;color:var(--muted);}
+.history-piece{font-size:13px;font-weight:500;color:var(--text);}
+.history-scores{display:flex;gap:5px;}
+.hscore{font-size:11px;padding:2px 8px;border-radius:4px;background:#faf5f7;border:1px solid var(--border);color:var(--muted);}
+
+/* Protocol warning */
+.protocol-warning{display:none;background:#fdfaf0;border:1px solid #d4b96a;border-radius:8px;padding:16px 20px;margin-bottom:16px;font-size:13px;color:#5a4a1a;line-height:1.7;}
+
+/* Error state */
+.error-item{padding:14px 16px;border-radius:8px;border-left:3px solid var(--red);background:#fdf5f4;margin-bottom:6px;}
+.error-title{font-size:13px;font-weight:600;color:var(--red);margin-bottom:4px;}
+.error-msg{font-size:13px;color:#5a3a3a;}
+.error-help{font-size:12px;color:var(--muted);margin-top:8px;line-height:1.6;}
+
+/* Autocomplete */
+.ac-item{padding:8px 12px;font-size:13px;font-family:Inter,sans-serif;color:var(--text);cursor:pointer;display:flex;align-items:center;gap:8px;transition:background .15s;}
+.ac-item:hover,.ac-item.ac-active{background:#fdf0f5;}
+.ac-item strong{color:var(--accent);}
+.ac-section{padding:5px 12px 3px;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.7px;color:var(--muted);border-top:1px solid var(--border);margin-top:2px;}
+.ac-section:first-child{border-top:none;margin-top:0;}
+.ac-hist-icon{font-size:11px;color:var(--muted);flex-shrink:0;}
+
+/* ── Warm-Up Generator ── */
+.warmup-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;background:rgba(255,255,255,.82);border:1px solid rgba(232,214,222,.7);border-radius:12px;padding:14px 20px;margin-bottom:16px;backdrop-filter:blur(8px);flex-wrap:wrap;}
+.warmup-bar-label{font-size:13px;color:var(--muted);flex:1;min-width:160px;}
+.warmup-bar-label strong{color:var(--text);display:block;font-size:14px;margin-bottom:2px;}
+.warmup-btn{display:inline-flex;align-items:center;gap:8px;padding:9px 20px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-family:"Cormorant Infant",serif;font-style:italic;font-size:18px;cursor:pointer;transition:all .25s;white-space:nowrap;flex-shrink:0;}
+.warmup-btn:hover{opacity:.88;}
+.warmup-btn:disabled{opacity:.5;cursor:default;}
+.warmup-result{background:rgba(255,245,249,.8);border:1px solid rgba(201,133,159,.25);border-left:3px solid var(--accent);border-radius:0 10px 10px 0;padding:16px 20px;margin-top:12px;font-family:"Cormorant Infant",serif;font-style:italic;font-size:17px;line-height:1.8;color:#7a4a62;display:none;}
+.warmup-result-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--accent);margin-bottom:10px;display:flex;align-items:center;gap:6px;}
+.warmup-result-title::before{content:'';}
+
+/* ── Sight-reading panel ── */
+.sr-panel{background:rgba(255,245,249,.6);border:1px solid rgba(201,133,159,.2);border-radius:12px;padding:22px 24px;margin-top:14px;display:none;}
+.sr-grade-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px;}
+.sr-grade-label{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--muted);white-space:nowrap;}
+.sr-grade-select{padding:8px 12px;border-radius:7px;border:1px solid var(--border);font-size:13px;font-family:Inter,sans-serif;background:#fdfbfc;color:var(--text);outline:none;cursor:pointer;transition:border .2s;}
+.sr-grade-select:focus{border-color:var(--accent);}
+.sr-gen-btn{display:inline-flex;align-items:center;gap:7px;padding:8px 18px;background:var(--accent);color:#fff;border:none;border-radius:7px;font-family:"Cormorant Infant",serif;font-style:italic;font-size:17px;cursor:pointer;transition:all .25s;white-space:nowrap;}
+.sr-gen-btn:hover{opacity:.88;}
+.sr-gen-btn:disabled{opacity:.5;cursor:default;}
+.sr-output{display:none;margin-top:4px;}
+.sr-output-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--accent);margin-bottom:12px;display:flex;align-items:center;gap:6px;}
+.sr-output-title::before{content:'';}
+.sr-piece-name{font-family:"Cormorant Infant",serif;font-style:italic;font-size:22px;font-weight:500;color:#8b5d73;margin-bottom:4px;}
+.sr-piece-grade{font-size:11px;color:var(--accent);font-weight:700;text-transform:uppercase;letter-spacing:.7px;margin-bottom:14px;}
+.sr-tips{font-size:13px;color:#4a2e3a;line-height:1.75;background:#fdf8fb;border-left:3px solid var(--accent);border-radius:0 8px 8px 0;padding:12px 16px;}
+.sr-play-note{font-size:12px;color:var(--muted);margin-top:12px;font-style:italic;}
+
+/* ── AI Planner ── */
+.planner-section{margin-top:20px;}
+.planner-section h3{font-family:"Cormorant Infant",serif;font-style:italic;font-size:26px;font-weight:500;color:#8b5d73;margin-bottom:6px;}
+.planner-section .planner-sub{font-family:"Cormorant Infant",serif;font-style:italic;font-size:17px;color:var(--muted);margin-bottom:16px;line-height:1.7;}
+.agent-thinking{display:flex;align-items:center;gap:12px;padding:14px 18px;border-radius:10px;background:rgba(255,245,249,.8);border:1px solid rgba(201,133,159,.2);margin-bottom:12px;}
+.agent-thinking-text{font-family:"Cormorant Infant",serif;font-style:italic;font-size:17px;color:#8b5d73;}
+.agent-msg{background:rgba(255,245,249,.8);border:1px solid rgba(201,133,159,.25);border-left:4px solid var(--accent);border-radius:0 12px 12px 0;padding:18px 22px;margin-bottom:14px;font-family:"Cormorant Infant",serif;font-style:italic;font-size:19px;line-height:1.85;color:#7a4a62;}
+.agent-msg .agent-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--accent);margin-bottom:8px;font-style:normal;font-family:Inter,sans-serif;display:flex;align-items:center;gap:6px;}
+.agent-label .agent-dot{width:7px;height:7px;border-radius:50%;background:var(--accent);animation:pulse-dot 2s ease-in-out infinite;}
+@keyframes pulse-dot{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.4;transform:scale(.7);}}
+.goal-card{background:rgba(255,255,255,.82);border:1px solid rgba(232,214,222,.7);border-radius:12px;padding:16px 20px;margin-bottom:14px;backdrop-filter:blur(8px);}
+.goal-card .goal-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);margin-bottom:8px;font-family:Inter,sans-serif;}
+.goal-card .goal-text{font-family:"Cormorant Infant",serif;font-style:italic;font-size:18px;color:#6b3d55;line-height:1.6;}
+.goal-input-row{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;}
+.goal-input{flex:1;padding:8px 12px;border-radius:7px;border:1px solid var(--border);font-family:"Cormorant Infant",serif;font-style:italic;font-size:17px;background:#fdfbfc;color:var(--text);outline:none;}
+.goal-input:focus{border-color:var(--accent);}
+.goal-btn{padding:8px 16px;background:var(--accent);color:#fff;border:none;border-radius:7px;font-family:"Cormorant Infant",serif;font-style:italic;font-size:17px;cursor:pointer;transition:opacity .2s;white-space:nowrap;}
+.goal-btn:hover{opacity:.88;}
+.plan-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-bottom:14px;}
+.plan-day{background:rgba(255,255,255,.82);border:1px solid rgba(232,214,222,.7);border-radius:10px;padding:13px 15px;backdrop-filter:blur(8px);transition:box-shadow .2s;}
+.plan-day:hover{box-shadow:0 6px 20px rgba(201,133,159,.14);}
+.plan-day-name{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--muted);margin-bottom:6px;font-family:Inter,sans-serif;}
+.plan-day-focus{font-family:"Cormorant Infant",serif;font-style:italic;font-size:16px;color:#7a4a62;line-height:1.5;margin-bottom:8px;}
+.plan-day-duration{font-size:11px;color:var(--muted);font-family:Inter,sans-serif;}
+.plan-day-status{display:flex;gap:5px;margin-top:8px;}
+.status-btn{padding:3px 10px;border-radius:5px;border:1px solid var(--border);font-size:11px;cursor:pointer;background:#fff;color:var(--muted);transition:all .15s;font-family:Inter,sans-serif;}
+.status-btn.done{background:#eafaf1;border-color:#b7e4c7;color:#2d8a5e;}
+.status-btn.skip{background:#fdf9f0;border-color:#e6d4a0;color:#b07d2a;}
+.trend-row{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px;}
+.trend-badge{padding:5px 12px;border-radius:20px;font-size:12px;font-family:Inter,sans-serif;font-weight:500;border:1px solid;}
+.trend-badge.improving{background:#eafaf1;border-color:#b7e4c7;color:#2d8a5e;}
+.trend-badge.struggling{background:#fdf5f4;border-color:#f0b8b0;color:#c0392b;}
+.trend-badge.steady{background:#fdf9f0;border-color:#e6d4a0;color:#b07d2a;}
+.planner-empty{text-align:center;padding:30px 20px;font-family:"Cormorant Infant",serif;font-style:italic;font-size:17px;color:#c4a0b4;line-height:1.7;}
+.report-gen-btn{font-family:"Cormorant Infant",serif;font-style:italic;font-size:19px;padding:10px 26px;border-radius:8px;border:1.5px solid var(--accent);background:rgba(255,255,255,.82);color:var(--accent);cursor:pointer;backdrop-filter:blur(8px);transition:all .2s;}
+.report-gen-btn:hover{background:var(--accent);color:#fff;}
+.report-gen-btn:disabled{opacity:.5;cursor:default;}
+
+/* Report modal */
+.report-modal{position:fixed;inset:0;z-index:2000;background:rgba(60,30,45,.45);backdrop-filter:blur(4px);display:flex;align-items:flex-start;justify-content:center;padding:80px 16px 40px;overflow-y:auto;}
+.report-modal-inner{background:#fff;border-radius:16px;width:100%;max-width:720px;box-shadow:0 24px 80px rgba(0,0,0,.18);display:flex;flex-direction:column;}
+.report-modal-header{display:flex;justify-content:space-between;align-items:center;padding:18px 24px;border-bottom:1px solid var(--border);border-radius:16px 16px 0 0;background:linear-gradient(135deg,#fff8fb,#fff2f7);flex-wrap:wrap;gap:10px;}
+.report-modal-title{font-family:"Cormorant Infant",serif;font-style:italic;font-size:24px;color:#8b5d73;}
+.report-action-btn{font-family:"Cormorant Infant",serif;font-style:italic;font-size:16px;padding:7px 18px;border-radius:7px;background:var(--accent);color:#fff;border:none;cursor:pointer;transition:opacity .2s;}
+.report-action-btn:hover{opacity:.88;}
+.report-close-btn{font-family:Inter,sans-serif;font-size:13px;padding:7px 14px;border-radius:7px;background:#f5eff2;color:var(--muted);border:1px solid var(--border);cursor:pointer;transition:background .2s;}
+.report-close-btn:hover{background:#ecdde6;}
+.report-body{padding:28px 32px;font-family:"Cormorant Infant",serif;font-style:italic;font-size:18px;line-height:1.9;color:#4a2e3a;}
+.report-thinking{display:flex;align-items:center;gap:12px;padding:20px 0;font-size:17px;color:#a08090;}
+.report-section{margin-bottom:28px;}
+.report-section-title{font-family:"Playfair Display",serif;font-size:15px;font-weight:700;font-style:normal;color:var(--accent);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid #f0d9e6;}
+.report-score-row{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;}
+.report-score-pill{padding:5px 14px;border-radius:20px;font-size:14px;font-style:normal;font-family:Inter,sans-serif;font-weight:600;border:1px solid;}
+.report-meta{font-size:14px;color:var(--muted);font-style:normal;font-family:Inter,sans-serif;margin-bottom:18px;}
+
+/* Email modal */
+.email-modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);backdrop-filter:blur(4px);z-index:1100;align-items:center;justify-content:center;}
+.email-modal-overlay.open{display:flex;}
+.email-modal{background:#fff;border:1px solid rgba(201,133,159,.2);border-radius:16px;padding:36px 36px 28px;max-width:520px;width:90%;box-shadow:0 24px 72px rgba(0,0,0,.3);position:relative;}
+.email-modal h3{font-family:"Cormorant Infant",serif;font-style:italic;font-size:26px;color:#8b5d73;margin-bottom:6px;}
+.email-modal-sub{font-size:13px;color:var(--muted);margin-bottom:24px;line-height:1.6;}
+.email-modal-field{display:flex;flex-direction:column;gap:6px;margin-bottom:16px;}
+.email-modal-field label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);}
+.email-modal-field input,.email-modal-field textarea{background:#fdfbfc;border:1.5px solid var(--border);border-radius:8px;padding:10px 14px;color:var(--text);font-family:Inter,sans-serif;font-size:13px;outline:none;transition:border-color .2s;}
+.email-modal-field input:focus,.email-modal-field textarea:focus{border-color:var(--accent);}
+.email-modal-field textarea{resize:vertical;min-height:100px;line-height:1.6;}
+.email-modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:8px;}
+.btn-modal-cancel{padding:10px 20px;border-radius:8px;font-size:13px;font-weight:600;background:transparent;border:1.5px solid var(--border);color:var(--muted);cursor:pointer;font-family:Inter,sans-serif;transition:all .2s;}
+.btn-modal-cancel:hover{border-color:#999;color:var(--text);}
+.btn-modal-send{padding:10px 24px;border-radius:8px;font-size:13px;font-weight:700;background:var(--accent);border:1.5px solid rgba(201,133,159,.35);color:#fff;cursor:pointer;font-family:Inter,sans-serif;transition:all .25s;display:flex;align-items:center;gap:8px;}
+.btn-modal-send:hover{opacity:.88;}
+.btn-modal-send:disabled{opacity:.5;cursor:default;}
+.email-modal-close{position:absolute;top:14px;right:16px;background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;line-height:1;transition:color .2s;}
+.email-modal-close:hover{color:var(--text);}
+.email-toast{position:fixed;bottom:32px;left:50%;transform:translateX(-50%) translateY(20px);background:#fff;border:1px solid rgba(201,133,159,.4);border-radius:10px;padding:14px 22px;color:var(--accent);font-size:13px;font-weight:600;font-family:Inter,sans-serif;display:flex;align-items:center;gap:10px;box-shadow:0 8px 32px rgba(0,0,0,.15);z-index:1200;opacity:0;transition:all .35s ease;pointer-events:none;}
+.email-toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+.email-toast.error{border-color:rgba(192,57,43,.4);color:var(--red);}
+
+/* ── Ask the Teacher chat ── */
+#askBtn{position:fixed;bottom:28px;right:28px;width:52px;height:52px;border-radius:50%;background:rgba(255,245,249,.95);border:2px solid var(--accent);cursor:pointer;box-shadow:0 6px 24px rgba(201,133,159,.4);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:1px;z-index:1100;transition:transform .25s,box-shadow .25s;}
+#askBtn:hover{transform:scale(1.08);box-shadow:0 10px 32px rgba(201,133,159,.5);}
+#askBtn svg{width:22px;height:22px;fill:var(--accent);}
+#askBtnLabel{font-size:7px;font-weight:700;letter-spacing:.5px;color:rgba(201,133,159,.7);text-transform:uppercase;}
+#askPanel{position:fixed;bottom:94px;right:28px;width:360px;max-height:520px;background:rgba(255,248,252,.97);border:1px solid rgba(201,133,159,.25);border-radius:14px;box-shadow:0 20px 60px rgba(0,0,0,.2);display:flex;flex-direction:column;z-index:1100;transform:translateY(16px) scale(.97);opacity:0;pointer-events:none;transition:transform .28s ease,opacity .28s ease;backdrop-filter:blur(20px);}
+#askPanel.open{transform:translateY(0) scale(1);opacity:1;pointer-events:all;}
+.ask-header{padding:14px 16px 12px;border-bottom:1px solid rgba(201,133,159,.15);display:flex;align-items:center;gap:10px;border-radius:14px 14px 0 0;background:linear-gradient(135deg,rgba(255,245,249,.95),rgba(247,232,239,.8));}
+.ask-header-icon{width:32px;height:32px;border-radius:50%;background:rgba(201,133,159,.12);border:1px solid rgba(201,133,159,.3);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+.ask-header-name{font-size:13px;color:#6b3d55;font-weight:700;line-height:1.2;}
+.ask-header-sub{font-size:10px;color:rgba(201,133,159,.7);margin-top:1px;letter-spacing:.3px;}
+.ask-close{background:none;border:none;cursor:pointer;color:var(--muted);font-size:18px;margin-left:auto;line-height:1;transition:color .2s;}
+.ask-close:hover{color:var(--text);}
+.ask-messages{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px;scroll-behavior:smooth;}
+.ask-messages::-webkit-scrollbar{width:3px;}
+.ask-messages::-webkit-scrollbar-thumb{background:rgba(201,133,159,.2);border-radius:3px;}
+.ask-msg{display:flex;gap:7px;align-items:flex-end;max-width:100%;}
+.ask-msg.user{flex-direction:row-reverse;}
+.ask-bubble{padding:9px 12px;border-radius:12px;font-size:12.5px;line-height:1.6;max-width:82%;word-break:break-word;font-family:Inter,sans-serif;}
+.ask-msg.bot .ask-bubble{background:rgba(201,133,159,.1);color:#5a2e42;border-radius:4px 12px 12px 12px;border:1px solid rgba(201,133,159,.15);}
+.ask-msg.user .ask-bubble{background:var(--accent);color:#fff;border-radius:12px 4px 12px 12px;}
+.ask-icon{width:24px;height:24px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:12px;background:rgba(201,133,159,.1);border:1px solid rgba(201,133,159,.2);}
+.ask-input-row{padding:10px;border-top:1px solid rgba(201,133,159,.1);display:flex;gap:7px;align-items:flex-end;border-radius:0 0 14px 14px;background:rgba(255,248,252,.9);}
+.ask-input{flex:1;padding:8px 11px;border-radius:9px;border:1px solid rgba(201,133,159,.2);font-size:12.5px;font-family:Inter,sans-serif;outline:none;resize:none;max-height:80px;line-height:1.5;color:var(--text);background:#fdfbfc;transition:border .2s;}
+.ask-input:focus{border-color:rgba(201,133,159,.5);}
+.ask-send{width:34px;height:34px;border-radius:50%;background:var(--accent);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:opacity .2s;}
+.ask-send:hover{opacity:.85;}
+.ask-send svg{width:14px;height:14px;fill:#fff;}
+.ask-send:disabled{opacity:.35;cursor:default;}
+.ask-typing{display:flex;gap:3px;align-items:center;padding:2px 0;}
+.ask-typing span{width:5px;height:5px;background:var(--accent);border-radius:50%;animation:atdot .9s ease-in-out infinite;}
+.ask-typing span:nth-child(2){animation-delay:.2s;}
+.ask-typing span:nth-child(3){animation-delay:.4s;}
+@keyframes atdot{0%,60%,100%{transform:translateY(0);}30%{transform:translateY(-5px);}}
+
+/* Print */
+@media print{body>*:not(#reportModal){display:none !important;}#reportModal{position:static !important;background:none !important;backdrop-filter:none !important;padding:0 !important;display:block !important;}.report-modal-inner{box-shadow:none;border-radius:0;}.report-modal-header{background:none;}.report-action-btn,.report-close-btn{display:none !important;}}
+@media(max-width:600px){.page-header h1{font-size:52px;}.feedback-area{padding:18px 16px;}.teacher-msg{font-size:16px;}.card{padding:18px;}.input-row{flex-direction:column;}}
+
+/* ── Floating music notes ── */
+.music-note{position:fixed;top:-60px;font-size:18px;pointer-events:none;opacity:.85;z-index:2;animation:fall linear infinite;filter:drop-shadow(0 2px 6px rgba(216,154,178,.35));}
+.note1{left:5%;animation-duration:16s;animation-delay:0s;color:#f39ac7}
+.note2{left:18%;animation-duration:12s;animation-delay:2s;color:#d89ab2;font-size:26px}
+.note3{left:32%;animation-duration:18s;animation-delay:4s;color:#b97a97}
+.note4{left:48%;animation-duration:14s;animation-delay:1s;color:#f6a9c8;font-size:24px}
+.note5{left:63%;animation-duration:17s;animation-delay:5s;color:#c97fa1}
+.note6{left:78%;animation-duration:13s;animation-delay:3s;color:#e68ab0;font-size:22px}
+.note7{left:90%;animation-duration:15s;animation-delay:6s;color:#d89ab2}
+@keyframes fall{0%{transform:translateY(-80px) translateX(0) rotate(0deg) scale(.8);opacity:0}10%{opacity:.9}50%{transform:translateY(50vh) translateX(25px) rotate(180deg) scale(1)}100%{transform:translateY(110vh) translateX(-25px) rotate(360deg) scale(.8);opacity:0}}
+</style>
+</head>
+<body>
+
+
+<nav>
+  <a class="logo" href="index.html">Haileyonstrings</a>
+  <a class="back-btn" href="index.html">&#8592; Back to Portfolio</a>
+</nav>
+
+<div class="main">
+
+  <!-- Header -->
+  <div class="page-header">
+    <h1>AI <em id="pageTitleInstrument">Violin</em> Teacher</h1>
+    <p id="pageDesc">Record your practice session and receive detailed, personalised feedback on your playing — intonation, rhythm, dynamics, tone quality, and musicality.</p>
+    <div class="page-header-badges">
+      <span class="header-badge" id="badgePitch">Real-time pitch detection</span>
+      <span class="header-badge">Watsonx.ai</span>
+      <span class="header-badge">Session history</span>
+      <span class="header-badge">AI practice planner</span>
+    </div>
+  </div>
+
+  <!-- Instrument Selector -->
+  <div class="instrument-selector" id="instrumentSelector">
+    <div class="instrument-label">Choose your instrument</div>
+    <div class="instrument-tabs">
+      <button class="instrument-tab active" id="tabViolin" onclick="switchInstrument('violin')">
+        <span class="instrument-tab-name">Violin</span>
+      </button>
+      <button class="instrument-tab" id="tabPiano" onclick="switchInstrument('piano')">
+        <span class="instrument-tab-name">Piano</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Session Setup -->
+  <div class="flow-wrap">
+    <div class="flow-title">Session Setup</div>
+
+    <div class="flow-step">
+      <div class="step-num-badge">1</div>
+      <div class="flow-step-body" style="overflow:visible;position:relative;z-index:10;">
+        <div class="flow-step-label" id="pieceCategoryLabel">Piece / Category</div>
+        <select class="piece-select" id="pieceSelect">
+          <option value="">— Select category —</option>
+          <option value="Scales" class="opt-violin">Scales</option>
+          <option value="Repertoire" class="opt-violin">Repertoire</option>
+          <option value="Improvisation" class="opt-violin">Improvisation</option>
+          <option value="Sight-reading" class="opt-violin">Sight-reading</option>
+          <option value="Other pieces" class="opt-violin">Other pieces</option>
+          <option value="Scales" class="opt-piano" style="display:none;">Scales &amp; Arpeggios</option>
+          <option value="Repertoire" class="opt-piano" style="display:none;">Repertoire</option>
+          <option value="Hanon" class="opt-piano" style="display:none;">Hanon / Technical Exercises</option>
+          <option value="Sight-reading" class="opt-piano" style="display:none;">Sight-reading</option>
+          <option value="Theory" class="opt-piano" style="display:none;">Theory &amp; Ear Training</option>
+          <option value="Other pieces" class="opt-piano" style="display:none;">Other</option>
+        </select>
+        <div id="customPieceWrap" style="display:none;margin-top:10px;position:relative;z-index:1001;">
+          <input class="api-input" id="customPiece" type="text" placeholder="Enter piece name…" autocomplete="off" style="width:100%;"/>
+          <div id="acDropdown" style="display:none;position:absolute;top:calc(100% + 4px);left:0;right:0;background:#fff;border:1px solid var(--border);border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.1);z-index:1000;max-height:200px;overflow-y:auto;"></div>
+        </div>
+        <!-- Sight-reading panel -->
+        <div class="sr-panel" id="srPanel">
+          <div class="sr-grade-row">
+            <span class="sr-grade-label">Grade</span>
+            <select class="sr-grade-select" id="srGrade">
+              <option value="1">Grade 1</option><option value="2">Grade 2</option>
+              <option value="3">Grade 3</option><option value="4">Grade 4</option>
+              <option value="5">Grade 5</option><option value="6">Grade 6</option>
+              <option value="7">Grade 7</option><option value="8">Grade 8</option>
+            </select>
+            <button class="sr-gen-btn" id="srGenBtn" onclick="generateSightReadingPiece()">Generate Piece</button>
+          </div>
+          <div class="sr-output" id="srOutput">
+            <div class="sr-output-title">Your Sight-Reading Piece</div>
+            <div class="sr-piece-name" id="srPieceName"></div>
+            <div class="sr-piece-grade" id="srPieceGrade"></div>
+            <div id="srScore" style="background:#fff;border-radius:8px;padding:12px 6px;overflow-x:auto;margin-bottom:14px;"></div>
+            <div class="sr-tips" id="srTips"></div>
+            <div class="sr-play-note">▶ Now record yourself playing this piece for AI feedback</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="flow-step">
+      <div class="step-num-badge">2</div>
+      <div class="flow-step-body">
+        <div class="flow-step-label">Focus Areas <span style="font-weight:400;letter-spacing:0;text-transform:none;font-size:11px;color:var(--muted);">— tap to toggle</span></div>
+        <div class="toggle-grid" id="focusToggles">
+          <div class="toggle active" data-val="intonation" data-instruments="violin">Intonation</div>
+          <div class="toggle active" data-val="rhythm" data-instruments="violin piano">Rhythm</div>
+          <div class="toggle active" data-val="dynamics" data-instruments="violin piano">Dynamics</div>
+          <div class="toggle active" data-val="tone" data-instruments="violin">Tone Quality</div>
+          <div class="toggle active" data-val="musicality" data-instruments="violin piano">Musicality</div>
+          <div class="toggle active" data-val="touch & tone" data-instruments="piano" style="display:none;">Touch &amp; Tone</div>
+          <div class="toggle active" data-val="hand independence" data-instruments="piano" style="display:none;">Hand Independence</div>
+          <div class="toggle active" data-val="pedalling" data-instruments="piano" style="display:none;">Pedalling</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Warm-Up Generator -->
+  <div class="warmup-bar" id="warmupBar">
+    <div class="warmup-bar-label">
+      <strong id="warmupBarTitle">AI Warm-Up Routine</strong>
+      <span id="warmupBarSub">Get a personalised 5-minute warm-up before you record</span>
+    </div>
+    <button class="warmup-btn" id="warmupBtn" onclick="generateWarmup()">Generate Warm-Up</button>
+    <div class="warmup-result" id="warmupResult">
+      <div class="warmup-result-title">Your Personalised Warm-Up</div>
+      <div id="warmupText"></div>
+    </div>
+  </div>
+
+  <!-- Mode tabs -->
+  <div class="mode-tabs">
+    <button class="mode-tab active" id="tabRecord" onclick="switchMode('record')">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="6"/></svg>
+      Live Recording
+    </button>
+    <button class="mode-tab" id="tabUpload" onclick="switchMode('upload')">
+      <svg viewBox="0 0 24 24"><path d="M9 16h6v-6h4l-7-7-7 7h4v6zm-4 2h14v2H5v-2z"/></svg>
+      Upload Audio File
+    </button>
+  </div>
+
+  <!-- Upload panel -->
+  <input type="file" id="uploadInput" accept="audio/*,video/mp4,video/webm" style="display:none;" onchange="uploadFileSelected(this.files[0])"/>
+  <div id="uploadPanel" style="display:none;margin-bottom:20px;">
+    <div class="upload-zone" id="uploadZone"
+         onclick="document.getElementById('uploadInput').click()"
+         ondragover="uploadDragOver(event)" ondragleave="uploadDragLeave(event)" ondrop="uploadDrop(event)">
+      <div class="upload-icon"><svg viewBox="0 0 24 24"><path d="M9 16h6v-6h4l-7-7-7 7h4v6zm-4 2h14v2H5v-2z"/></svg></div>
+      <div class="upload-title">Drop your recording here</div>
+      <div class="upload-sub" id="uploadSubText">Drag &amp; drop an audio or video file of your playing,<br/>or click to browse your device.</div>
+      <div class="upload-formats">
+        <span class="upload-fmt">MP3</span><span class="upload-fmt">WAV</span>
+        <span class="upload-fmt">M4A</span><span class="upload-fmt">OGG</span>
+        <span class="upload-fmt">WEBM</span><span class="upload-fmt">MP4</span>
+        <span class="upload-fmt">FLAC</span>
+      </div>
+    </div>
+    <div id="uploadVideoWrap" style="display:none;margin-bottom:12px;border-radius:12px;overflow:hidden;background:#000;">
+      <video id="uploadVideoPreview" style="width:100%;max-height:340px;display:block;border-radius:12px;" controls playsinline></video>
+    </div>
+    <div class="upload-file-info" id="uploadFileInfo">
+      <div class="upload-file-icon" id="uploadFileIcon"></div>
+      <div style="flex:1;overflow:hidden;">
+        <div class="upload-file-name" id="uploadFileName">—</div>
+        <div class="upload-file-size" id="uploadFileSize">—</div>
+      </div>
+      <div class="upload-file-actions">
+        <button class="upload-analyse-btn" id="uploadAnalyseBtn" onclick="analyseUploadedFile(event)">Analyse with AI</button>
+        <button class="upload-clear-btn" onclick="clearUpload(event)">×</button>
+      </div>
+    </div>
+    <div class="upload-progress" id="uploadProgress"><div class="upload-progress-fill" id="uploadProgressFill"></div></div>
+    <div class="upload-status" id="uploadStatus"></div>
+  </div>
+
+  <!-- Record + Camera row -->
+  <div class="record-camera-row" id="recordCameraRow">
+
+    <div class="record-area" id="recordArea">
+      <div class="device-select-row" id="deviceSelectRow">
+        <label class="device-select-label" for="audioDeviceSelect">Input Device</label>
+        <select id="audioDeviceSelect" class="device-select-ctrl" onchange="selectedDeviceId=this.value">
+          <option value="">Default microphone</option>
+        </select>
+        <button class="device-refresh-btn" onclick="populateAudioDevices()" title="Refresh device list">Refresh</button>
+      </div>
+      <div class="device-hint" id="deviceHint">Click <strong>Refresh</strong> after granting microphone permission to see all connected devices.</div>
+
+      <button class="record-btn idle" id="recordBtn" onclick="toggleRecording()">
+        <svg id="recIconIdle" viewBox="0 0 24 24"><circle cx="12" cy="12" r="6"/></svg>
+        <svg id="recIconStop" viewBox="0 0 24 24" style="display:none"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>
+        <svg id="recIconSpin" viewBox="0 0 24 24" style="display:none;animation:spin-icon 1s linear infinite"><path d="M12 2a10 10 0 0 1 10 10" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round"/></svg>
+      </button>
+      <div style="font-size:15px;font-weight:600;color:var(--text);min-height:24px;" id="recordLabel">Start Recording</div>
+      <div class="timer" id="timer"></div>
+      <div class="record-hint" id="recordHint">Press the button, then play your piece. Recording stops automatically after 90 seconds, or press again to stop early and receive feedback.</div>
+
+      <div class="meters" id="liveMeters" style="display:none;">
+        <div class="meter"><div class="meter-label" id="mNoteLabel">Note Detected</div><div class="meter-value" id="mNote">—</div><div class="meter-sub" id="mFreq">— Hz</div></div>
+        <div class="meter"><div class="meter-label" id="mTuneLabel">Tuning</div><div class="meter-value" id="mTune">—</div><div class="meter-sub" id="mCents">— cents</div></div>
+        <div class="meter"><div class="meter-label">Volume</div><div class="meter-value" id="mVol">—</div><div class="meter-sub">dB</div></div>
+      </div>
+      <div class="pitch-bar-wrap" id="pitchBarWrap" style="display:none;">
+        <div class="pitch-bar-label" id="pitchBarLabel">Pitch accuracy — centre line = in tune</div>
+        <div class="pitch-bar-track"><div class="pitch-center-line"></div><div class="pitch-bar-fill" id="pitchBarFill" style="width:50%;"></div></div>
+      </div>
+      <div class="waveform-wrap" id="waveformWrap" style="display:none;"><canvas id="waveform"></canvas></div>
+    </div>
+
+    <!-- Webcam panel -->
+    <div class="webcam-panel" id="webcamPanel">
+      <div class="webcam-toggle-row">
+        <span class="webcam-toggle-label">Camera — Posture AI</span>
+        <span style="font-size:10px;color:var(--muted);">Visual feedback</span>
+      </div>
+      <div class="webcam-body">
+        <div class="webcam-video-wrap">
+          <video id="webcamVideo" autoplay muted playsinline width="640" height="480"></video>
+          <div class="webcam-overlay" id="webcamOverlay">
+            <span></span>
+            <span id="webcamOverlayText" style="text-align:center;">Press Record to<br/>auto-start camera</span>
+          </div>
+        </div>
+        <div class="webcam-controls-row">
+          <button class="webcam-start-btn" id="webcamStartBtn" onclick="toggleWebcamStream()">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M17 10.5V7a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-3.5l4 4v-11l-4 4z"/></svg>
+            Start Camera
+          </button>
+          <span style="font-size:11px;color:var(--muted);" id="webcamStatus">Camera off</span>
+        </div>
+        <div id="webcamFileWarning" style="display:none;padding:8px 10px;background:rgba(176,125,42,.1);border:1px solid rgba(176,125,42,.3);border-radius:7px;font-size:11px;color:var(--amber);line-height:1.5;">
+          Needs HTTP server — open via Live Server or <code>npx serve .</code>
+        </div>
+        <p class="webcam-hint">AI captures snapshots during recording and analyses your posture &amp; technique.</p>
+        <canvas id="snapshotCanvas"></canvas>
+        <div class="webcam-snapshot-strip" id="snapshotStrip"></div>
+      </div>
+    </div>
+
+  </div><!-- /record-camera-row -->
+
+  <!-- Playback panel -->
+  <div class="playback-panel" id="playbackPanel" style="display:none;">
+    <div class="playback-header">
+      <div class="playback-title">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+        Your Recording
+      </div>
+      <div class="playback-meta" id="playbackMeta">—</div>
+      <button class="playback-discard" onclick="discardPlayback()">×</button>
+    </div>
+    <audio id="playbackAudio" controls style="width:100%;margin-top:10px;"></audio>
+  </div>
+
+  <!-- Protocol warning -->
+  <div class="protocol-warning" id="protocolWarning">
+    <strong>Microphone and API access are blocked.</strong><br/>
+    This page is being opened as a local file (<code>file://</code>). Browsers block microphone and network access from local files.<br/><br/>
+    <strong>To resolve this, serve the page over HTTP:</strong><br/>
+    1. In VS Code, install <a href="https://marketplace.visualstudio.com/items?itemName=ritwickdey.LiveServer" target="_blank" style="color:var(--accent);">Live Server</a> and click Go Live, or<br/>
+    2. Run <code>npx serve .</code> in a terminal and open <code>http://localhost:3000/violin-teacher%201.html</code>, or<br/>
+    3. Deploy to GitHub Pages.
+  </div>
+
+  <!-- Feedback area -->
+  <div class="feedback-area" id="feedbackArea">
+    <h2 id="feedbackHeading">AI Feedback</h2>
+    <div id="feedbackContent">
+      <div class="empty-state">
+        <div class="empty-state-title">Ready to listen</div>
+        When you play, I'll listen carefully and give you detailed feedback.
+      </div>
+    </div>
+  </div>
+
+  <!-- Posture card -->
+  <div class="posture-card" id="postureCard" style="display:none;">
+    <div class="posture-card-header">
+      <div class="posture-card-icon" id="postureCardIcon"></div>
+      <div class="posture-card-title" id="postureCardTitle">Posture &amp; Movement Feedback</div>
+      <span class="posture-card-badge">Visual AI</span>
+    </div>
+    <div id="postureContent">
+      <div class="posture-empty">Posture analysis will appear here after a recorded session with camera enabled.</div>
+    </div>
+  </div>
+
+  <!-- Session history -->
+  <div class="history-section" id="historySection" style="display:none;">
+    <h3>Session History</h3>
+    <div id="historyList"></div>
+  </div>
+
+  <!-- AI Practice Planner -->
+  <div class="card planner-section" id="plannerSection">
+    <h3 id="plannerTitle">My Little AI Planner</h3>
+    <p class="planner-sub" id="plannerSub">Set your goal first, then complete a practice session — the agent will analyse your playing and build a personalised weekly plan automatically.</p>
+    <div class="goal-card" id="goalCard">
+      <div class="goal-label">Your Goal</div>
+      <div class="goal-text" id="goalText">No goal set yet — tell me what you'd like to work towards!</div>
+      <div class="goal-input-row">
+        <input class="goal-input" id="goalInput" type="text" placeholder="e.g. Prepare Twinkle for my recital in 4 weeks…" autocomplete="off"/>
+        <button class="goal-btn" onclick="setGoal()">Set Goal</button>
+        <button class="goal-btn" id="resetPlannerBtn" onclick="resetPlanner()" style="background:rgba(192,57,43,.1);color:var(--red);border:1px solid rgba(192,57,43,.25);" title="Clear all planner data">Reset</button>
+      </div>
+    </div>
+    <div class="trend-row" id="trendRow"></div>
+    <div id="agentMsgArea"></div>
+    <div id="weeklyPlanArea"></div>
+    <div id="reportBtnRow" style="display:none;margin-top:4px;">
+      <button class="report-gen-btn" id="reportGenBtn" onclick="generateReport()">Generate Weekly Report</button>
+    </div>
+    <div class="planner-empty" id="plannerEmpty">Set your goal above, then complete a practice session — your personalised weekly plan will appear here automatically.</div>
+  </div>
+
+  <!-- Report modal -->
+  <div id="reportModal" class="report-modal" style="display:none;">
+    <div class="report-modal-inner">
+      <div class="report-modal-header">
+        <div class="report-modal-title">Weekly Practice Report</div>
+        <div style="display:flex;gap:8px;">
+          <button class="report-action-btn" onclick="window.print()">Print / Save PDF</button>
+          <button class="report-close-btn" onclick="closeReport()">Close</button>
+        </div>
+      </div>
+      <div class="report-body" id="reportBody">
+        <div class="report-thinking" id="reportThinking">
+          <div class="dot-wave"><div></div><div></div><div></div></div>
+          <span>Generating your report…</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Watsonx.ai API Key Setup -->
+  <div class="card" id="setupCard" style="margin-top:16px;">
+    <div class="card-title">Connect AI Teacher</div>
+    <p class="api-note">This tool uses Watsonx.ai to analyse your playing. Your key is stored only in this browser session and is sent directly to Watsonx.ai — never to any other server.</p>
+    <div class="input-row">
+      <input class="api-input" id="apiKeyInput" type="password" placeholder="Paste your Watsonx.ai API key here"/>
+      <button class="save-btn" onclick="saveApiKey()">Connect</button>
+    </div>
+    <div class="api-status" id="apiStatus"></div>
+  </div>
+
+</div><!-- /main -->
+
+<!-- Ask the Teacher floating button & panel -->
+<button id="askBtn" onclick="toggleAsk()" aria-label="Ask AI Teacher">
+  <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12c0 1.85.5 3.58 1.37 5.07L2 22l5.12-1.34A9.94 9.94 0 0 0 12 22c5.52 0 10-4.48 10-10S17.52 2 12 2zm1 14H7v-2h6v2zm2-4H7V10h8v2zm0-4H7V6h8v2z"/></svg>
+  <span id="askBtnLabel">Ask</span>
+</button>
+<div id="askPanel">
+  <div class="ask-header">
+    <div class="ask-header-icon" id="askHeaderIcon"></div>
+    <div>
+      <div class="ask-header-name" id="askHeaderName">AI Violin Teacher</div>
+      <div class="ask-header-sub" id="askHeaderSub">Ask anything about your playing</div>
+    </div>
+    <button class="ask-close" onclick="toggleAsk()">×</button>
+  </div>
+  <div class="ask-messages" id="askMessages">
+    <div class="ask-msg bot">
+      <div class="ask-icon" id="askGreetIcon"></div>
+      <div class="ask-bubble" id="askGreetBubble">Hi! I'm your AI Violin Teacher. Ask me anything — technique, posture, practice tips, theory, or questions about your last session.</div>
+    </div>
+  </div>
+  <div class="ask-input-row">
+    <textarea class="ask-input" id="askInput" rows="1" placeholder="Ask a question…" onkeydown="handleAskKey(event)" oninput="autoResizeAsk(this)"></textarea>
+    <button class="ask-send" id="askSendBtn" onclick="sendAsk()" aria-label="Send">
+      <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+    </button>
+  </div>
+</div>
+
+<!-- Email to Parent modal -->
+<div class="email-modal-overlay" id="emailModal" onclick="if(event.target===this)closeEmailModal()">
+  <div class="email-modal">
+    <button class="email-modal-close" onclick="closeEmailModal()">×</button>
+    <h3>Send Practice Update</h3>
+    <p class="email-modal-sub">Send the AI feedback from this session directly to a parent or guardian.</p>
+    <div class="email-modal-field">
+      <label>Recipient Email</label>
+      <input type="email" id="emailTo" placeholder="parent@example.com"/>
+    </div>
+    <div class="email-modal-field">
+      <label>Note to Parent</label>
+      <textarea id="emailNote" rows="5"></textarea>
+    </div>
+    <div class="email-modal-actions">
+      <button class="btn-modal-cancel" onclick="closeEmailModal()">Cancel</button>
+      <button class="btn-modal-send" id="emailSendBtn" onclick="sendParentEmail()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        Send Email
+      </button>
+    </div>
+  </div>
+</div>
+<div class="email-toast" id="emailToast"></div>
+
+
+<!-- Floating music notes -->
+<div class="music-note note1">♩</div>
+<div class="music-note note2">♪</div>
+<div class="music-note note3">♫</div>
+<div class="music-note note4">♬</div>
+<div class="music-note note5">𝄞</div>
+<div class="music-note note6">♩</div>
+<div class="music-note note7">♪</div>
+
+<script>
+/* ═══════════════════════════════════════════════
+   CONFIG & STATE
+═══════════════════════════════════════════════ */
+const WATSONX_URL  = 'https://us-south.ml.cloud.ibm.com/ml/v1/text/generation?version=2023-05-29';
+const WATSONX_MODEL = 'meta-llama/llama-3-3-70b-instruct';
+const MAX_RECORD_SEC = 90;
+
+let apiKey = sessionStorage.getItem('wx_api_key') || '';
+let currentInstrument = 'violin';
+let mediaRecorder, audioChunks = [], recordingStream;
+let timerInterval, recordingSec = 0;
+let audioContext, analyserNode, sourceNode, pitchInterval, waveformRAF;
+let lastFeedback = null;
+let sessionHistory = JSON.parse(localStorage.getItem('vh_history') || '[]');
+let goal = localStorage.getItem('vh_goal') || '';
+let weeklyPlan = JSON.parse(localStorage.getItem('vh_plan') || 'null');
+let selectedDeviceId = '';
+let webcamStream = null;
+let snapshotDataURLs = [];
+let uploadedFile = null;
+let acHistory = JSON.parse(localStorage.getItem('vh_piece_history') || '[]');
+let acIndex = -1;
+let acItems = [];
+
+/* ═══════════════════════════════════════════════
+   INIT
+═══════════════════════════════════════════════ */
+window.addEventListener('DOMContentLoaded', () => {
+  if (location.protocol === 'file:') {
+    document.getElementById('protocolWarning').style.display = 'block';
+  }
+  if (apiKey) {
+    document.getElementById('apiKeyInput').value = apiKey;
+    document.getElementById('apiStatus').textContent = '✓ API key loaded from session';
+    document.getElementById('apiStatus').className = 'api-status ok';
+  }
+  renderHistory();
+  renderPlan();
+  if (goal) {
+    document.getElementById('goalText').textContent = goal;
+    document.getElementById('goalInput').value = goal;
+  }
+  populateAudioDevices();
+  switchInstrument('violin');
+});
+
+/* ═══════════════════════════════════════════════
+   INSTRUMENT SWITCHER
+═══════════════════════════════════════════════ */
+function switchInstrument(inst) {
+  currentInstrument = inst;
+  document.getElementById('tabViolin').classList.toggle('active', inst === 'violin');
+  document.getElementById('tabPiano').classList.toggle('active', inst === 'piano');
+  document.getElementById('pageTitleInstrument').textContent = inst === 'violin' ? 'Violin' : 'Piano';
+  document.getElementById('pageDesc').textContent = inst === 'violin'
+    ? 'Record your practice session and receive detailed, personalised feedback on your playing — intonation, rhythm, dynamics, tone quality, and musicality.'
+    : 'Record your piano practice and receive personalised feedback on touch, tone, hand independence, pedalling, rhythm, and musicality.';
+  document.getElementById('badgePitch').textContent = inst === 'violin' ? 'Real-time pitch detection' : 'Real-time dynamics';
+  document.querySelectorAll('.opt-violin').forEach(o => o.style.display = inst === 'violin' ? '' : 'none');
+  document.querySelectorAll('.opt-piano').forEach(o => o.style.display = inst === 'piano' ? '' : 'none');
+  document.getElementById('pieceSelect').value = '';
+  document.querySelectorAll('#focusToggles .toggle').forEach(t => {
+    const insts = (t.dataset.instruments || '').split(' ');
+    const show = insts.includes(inst);
+    t.style.display = show ? '' : 'none';
+    if (!show) t.classList.remove('active');
+    else t.classList.add('active');
+  });
+  document.getElementById('mNoteLabel').textContent = inst === 'violin' ? 'Note Detected' : 'Dynamics';
+  document.getElementById('mTuneLabel').textContent = inst === 'violin' ? 'Tuning' : 'Tempo Feel';
+  document.getElementById('pitchBarLabel').textContent = inst === 'violin' ? 'Pitch accuracy — centre line = in tune' : 'Dynamics level';
+  document.getElementById('warmupBarTitle').textContent = inst === 'violin' ? 'AI Warm-Up Routine' : 'AI Piano Warm-Up';
+  document.getElementById('warmupBarSub').textContent = inst === 'violin'
+    ? 'Get a personalised 5-minute warm-up before you record'
+    : 'Get a personalised piano warm-up and finger exercise routine';
+  document.getElementById('plannerTitle').textContent = 'My Little AI Planner';
+  document.getElementById('plannerSub').textContent = inst === 'violin'
+    ? 'Set your goal first, then complete a practice session — the agent will analyse your playing and build a personalised weekly plan automatically.'
+    : 'Set your piano goal, complete a session, and the AI will generate a personalised weekly practice plan.';
+  document.getElementById('askHeaderName').textContent = `AI ${inst === 'violin' ? 'Violin' : 'Piano'} Teacher`;
+  document.getElementById('askGreetBubble').textContent = `Hi! I'm your AI ${inst === 'violin' ? 'Violin' : 'Piano'} Teacher. Ask me anything — technique, posture, practice tips, theory, or questions about your last session.`;
+  document.getElementById('recordHint').textContent = inst === 'violin'
+    ? 'Press the button, then play your piece. Recording stops automatically after 90 seconds, or press again to stop early and receive feedback.'
+    : 'Press the button, then play your piece at the piano. Recording stops automatically after 90 seconds.';
+  document.getElementById('pieceCategoryLabel').textContent = inst === 'violin' ? 'Piece / Category' : 'Piece / Exercise';
+  const srPanel = document.getElementById('srPanel');
+  if (srPanel) srPanel.style.display = 'none';
+}
+
+/* ═══════════════════════════════════════════════
+   API KEY
+═══════════════════════════════════════════════ */
+function saveApiKey() {
+  const val = document.getElementById('apiKeyInput').value.trim();
+  if (!val) { showApiStatus('Please enter an API key.', false); return; }
+  apiKey = val;
+  sessionStorage.setItem('wx_api_key', val);
+  showApiStatus('✓ API key saved for this session', true);
+}
+function showApiStatus(msg, ok) {
+  const el = document.getElementById('apiStatus');
+  el.textContent = msg;
+  el.className = 'api-status ' + (ok ? 'ok' : 'err');
+}
+
+/* ═══════════════════════════════════════════════
+   MODE TABS (record / upload)
+═══════════════════════════════════════════════ */
+function switchMode(mode) {
+  const isRecord = mode === 'record';
+  document.getElementById('tabRecord').classList.toggle('active', isRecord);
+  document.getElementById('tabUpload').classList.toggle('active', !isRecord);
+  document.getElementById('recordCameraRow').style.display = isRecord ? '' : 'none';
+  document.getElementById('uploadPanel').style.display = isRecord ? 'none' : '';
+  document.getElementById('playbackPanel').style.display = 'none';
+}
+
+/* ═══════════════════════════════════════════════
+   AUDIO DEVICES
+═══════════════════════════════════════════════ */
+async function populateAudioDevices() {
+  try {
+    const devices = await navigator.mediaDevices.enumerateDevices();
+    const sel = document.getElementById('audioDeviceSelect');
+    const prev = sel.value;
+    sel.innerHTML = '<option value="">Default microphone</option>';
+    devices.filter(d => d.kind === 'audioinput').forEach(d => {
+      const o = document.createElement('option');
+      o.value = d.deviceId;
+      o.textContent = d.label || `Microphone ${sel.options.length}`;
+      sel.appendChild(o);
+    });
+    if (prev) sel.value = prev;
+    selectedDeviceId = sel.value;
+  } catch(e) {}
+}
+
+/* ═══════════════════════════════════════════════
+   RECORDING
+═══════════════════════════════════════════════ */
+async function toggleRecording() {
+  if (mediaRecorder && mediaRecorder.state === 'recording') {
+    stopRecording();
+  } else {
+    await startRecording();
+  }
+}
+
+async function startRecording() {
+  if (!apiKey) {
+    showApiStatus('⚠ Please enter and save your API key first.', false);
+    document.getElementById('setupCard').scrollIntoView({behavior:'smooth'});
+    return;
+  }
+  try {
+    const constraints = {audio: selectedDeviceId ? {deviceId:{exact:selectedDeviceId}} : true};
+    recordingStream = await navigator.mediaDevices.getUserMedia(constraints);
+    await populateAudioDevices();
+  } catch(e) {
+    showFeedbackError('Microphone access denied', 'Please allow microphone access in your browser settings.', e.message);
+    return;
+  }
+
+  audioChunks = [];
+  const mimeType = ['audio/webm;codecs=opus','audio/webm','audio/ogg'].find(t => MediaRecorder.isTypeSupported(t)) || '';
+  mediaRecorder = new MediaRecorder(recordingStream, mimeType ? {mimeType} : {});
+  mediaRecorder.ondataavailable = e => { if (e.data.size > 0) audioChunks.push(e.data); };
+  mediaRecorder.onstop = onRecordingStop;
+  mediaRecorder.start(250);
+
+  setRecordUI('recording');
+  startTimer();
+  setupAnalyser(recordingStream);
+
+  snapshotDataURLs = [];
+  document.getElementById('snapshotStrip').innerHTML = '';
+  if (webcamStream) scheduleSnapshots();
+
+  timerInterval && clearInterval(timerInterval);
+  timerInterval = setInterval(() => {
+    recordingSec++;
+    updateTimerDisplay();
+    if (recordingSec >= MAX_RECORD_SEC) stopRecording();
+  }, 1000);
+}
+
+function stopRecording() {
+  if (mediaRecorder && mediaRecorder.state !== 'inactive') mediaRecorder.stop();
+  recordingStream && recordingStream.getTracks().forEach(t => t.stop());
+  clearInterval(timerInterval);
+  stopAnalyser();
+  setRecordUI('analyzing');
+}
+
+function onRecordingStop() {
+  const blob = new Blob(audioChunks, {type: mediaRecorder.mimeType || 'audio/webm'});
+  const url = URL.createObjectURL(blob);
+  const dur = recordingSec;
+  recordingSec = 0;
+  setRecordUI('idle');
+
+  const panel = document.getElementById('playbackPanel');
+  const audio = document.getElementById('playbackAudio');
+  audio.src = url;
+  document.getElementById('playbackMeta').textContent = `${formatDuration(dur)} · ${(blob.size/1024).toFixed(0)} KB`;
+  panel.style.display = '';
+
+  analyseAudio(blob, dur);
+}
+
+function discardPlayback() {
+  const audio = document.getElementById('playbackAudio');
+  URL.revokeObjectURL(audio.src);
+  audio.src = '';
+  document.getElementById('playbackPanel').style.display = 'none';
+}
+
+function setRecordUI(state) {
+  const btn = document.getElementById('recordBtn');
+  const label = document.getElementById('recordLabel');
+  btn.className = 'record-btn ' + state;
+  document.getElementById('recIconIdle').style.display = state === 'idle' ? '' : 'none';
+  document.getElementById('recIconStop').style.display = state === 'recording' ? '' : 'none';
+  document.getElementById('recIconSpin').style.display = state === 'analyzing' ? '' : 'none';
+  label.textContent = state === 'idle' ? 'Start Recording' : state === 'recording' ? 'Recording…' : 'Analysing…';
+  document.getElementById('liveMeters').style.display = state === 'recording' ? '' : 'none';
+  document.getElementById('pitchBarWrap').style.display = state === 'recording' ? '' : 'none';
+  document.getElementById('waveformWrap').style.display = state === 'recording' ? '' : 'none';
+  document.getElementById('timer').textContent = state === 'idle' ? '' : '';
+}
+
+function startTimer() { recordingSec = 0; updateTimerDisplay(); }
+function updateTimerDisplay() {
+  document.getElementById('timer').textContent = `${String(Math.floor(recordingSec/60)).padStart(2,'0')}:${String(recordingSec%60).padStart(2,'0')}`;
+}
+function formatDuration(s) {
+  return s < 60 ? `${s}s` : `${Math.floor(s/60)}m ${s%60}s`;
+}
+
+/* ═══════════════════════════════════════════════
+   AUDIO ANALYSER (pitch/volume)
+═══════════════════════════════════════════════ */
+function setupAnalyser(stream) {
+  try {
+    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    analyserNode = audioContext.createAnalyser();
+    analyserNode.fftSize = 4096;
+    sourceNode = audioContext.createMediaStreamSource(stream);
+    sourceNode.connect(analyserNode);
+    pitchInterval = setInterval(updateMeters, 80);
+    drawWaveform();
+  } catch(e) {}
+}
+
+function stopAnalyser() {
+  clearInterval(pitchInterval);
+  cancelAnimationFrame(waveformRAF);
+  try { audioContext && audioContext.close(); } catch(e){}
+  analyserNode = sourceNode = audioContext = null;
+}
+
+function updateMeters() {
+  if (!analyserNode) return;
+  const buf = new Float32Array(analyserNode.fftSize);
+  analyserNode.getFloatTimeDomainData(buf);
+  const pitch = autoCorrelate(buf, audioContext.sampleRate);
+  let rms = 0;
+  for (let i = 0; i < buf.length; i++) rms += buf[i]*buf[i];
+  rms = Math.sqrt(rms / buf.length);
+  const db = rms > 0 ? Math.max(-60, 20*Math.log10(rms)) : -60;
+
+  if (pitch > 0) {
+    const {note, cents} = freqToNoteAndCents(pitch);
+    document.getElementById('mNote').textContent = note;
+    document.getElementById('mFreq').textContent = `${pitch.toFixed(1)} Hz`;
+    const absCents = Math.abs(cents);
+    const noteEl = document.getElementById('mTune');
+    noteEl.textContent = absCents < 8 ? 'In Tune' : cents > 0 ? `+${cents}¢` : `${cents}¢`;
+    noteEl.className = 'meter-value ' + (absCents < 8 ? 'green' : absCents < 20 ? 'amber' : 'red');
+    document.getElementById('mCents').textContent = `${cents > 0?'+':''}${cents} cents`;
+    const pct = Math.min(100, Math.max(0, 50 + cents*1.5));
+    document.getElementById('pitchBarFill').style.width = pct + '%';
+  } else {
+    document.getElementById('mNote').textContent = '—';
+    document.getElementById('mTune').textContent = '—';
+    document.getElementById('mTune').className = 'meter-value';
+    document.getElementById('pitchBarFill').style.width = '50%';
+  }
+  const volEl = document.getElementById('mVol');
+  volEl.textContent = db.toFixed(1);
+  volEl.className = 'meter-value ' + (db > -10 ? 'red' : db > -25 ? 'green' : 'amber');
+}
+
+function drawWaveform() {
+  const canvas = document.getElementById('waveform');
+  if (!canvas || !analyserNode) return;
+  const ctx = canvas.getContext('2d');
+  const W = canvas.offsetWidth, H = canvas.offsetHeight;
+  canvas.width = W; canvas.height = H;
+  const buf = new Uint8Array(analyserNode.frequencyBinCount);
+  analyserNode.getByteTimeDomainData(buf);
+  ctx.clearRect(0,0,W,H);
+  ctx.strokeStyle = 'rgba(201,133,159,.7)';
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  for (let i=0;i<buf.length;i++) {
+    const x = i/buf.length*W, y = buf[i]/128*H/2;
+    i===0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
+  }
+  ctx.stroke();
+  waveformRAF = requestAnimationFrame(drawWaveform);
+}
+
+/* Autocorrelation pitch detection */
+function autoCorrelate(buf, sampleRate) {
+  const SIZE = buf.length;
+  let rms = 0;
+  for (let i=0;i<SIZE;i++) rms+=buf[i]*buf[i];
+  rms=Math.sqrt(rms/SIZE);
+  if (rms<0.01) return -1;
+  let r1=0,r2=SIZE-1;
+  for(let i=0;i<SIZE/2;i++){if(Math.abs(buf[i])<0.2){r1=i;break;}}
+  for(let i=1;i<SIZE/2;i++){if(Math.abs(buf[SIZE-i])<0.2){r2=SIZE-i;break;}}
+  const slice=buf.slice(r1,r2);
+  const c=new Array(slice.length).fill(0);
+  for(let i=0;i<slice.length;i++) for(let j=0;j<slice.length-i;j++) c[i]+=slice[j]*slice[j+i];
+  let d=0;while(c[d]>c[d+1])d++;
+  let maxval=-1,maxpos=-1;
+  for(let i=d;i<slice.length;i++){if(c[i]>maxval){maxval=c[i];maxpos=i;}}
+  if(maxpos<0)return -1;
+  let T0=maxpos;
+  const x1=c[T0-1],x2=c[T0],x3=c[T0+1];
+  T0=T0+(x3-x1)/(2*(2*x2-x1-x3));
+  return sampleRate/T0;
+}
+
+function freqToNoteAndCents(freq) {
+  const notes=['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+  const semitones = 12*Math.log2(freq/440)+57;
+  const noteIdx = Math.round(semitones)%12;
+  const octave = Math.floor(Math.round(semitones)/12);
+  const cents = Math.round((semitones-Math.round(semitones))*100);
+  return {note: notes[((noteIdx%12)+12)%12]+octave, cents};
+}
+
+/* ═══════════════════════════════════════════════
+   WEBCAM
+═══════════════════════════════════════════════ */
+async function toggleWebcamStream() {
+  if (webcamStream) {
+    stopWebcam();
+  } else {
+    await startWebcam();
+  }
+}
+
+async function startWebcam() {
+  if (location.protocol === 'file:') {
+    document.getElementById('webcamFileWarning').style.display = '';
+    return;
+  }
+  try {
+    webcamStream = await navigator.mediaDevices.getUserMedia({video:{width:640,height:480,facingMode:'user'},audio:false});
+    const vid = document.getElementById('webcamVideo');
+    vid.srcObject = webcamStream;
+    document.getElementById('webcamOverlay').style.display = 'none';
+    document.getElementById('webcamStartBtn').textContent = '⏹ Stop Camera';
+    document.getElementById('webcamStartBtn').classList.add('active');
+    document.getElementById('webcamStatus').textContent = 'Camera active';
+  } catch(e) {
+    document.getElementById('webcamStatus').textContent = 'Camera access denied';
+  }
+}
+
+function stopWebcam() {
+  if (webcamStream) { webcamStream.getTracks().forEach(t=>t.stop()); webcamStream=null; }
+  const vid = document.getElementById('webcamVideo');
+  vid.srcObject = null;
+  document.getElementById('webcamOverlay').style.display = '';
+  document.getElementById('webcamStartBtn').textContent = 'Start Camera';
+  document.getElementById('webcamStartBtn').classList.remove('active');
+  document.getElementById('webcamStatus').textContent = 'Camera off';
+}
+
+function scheduleSnapshots() {
+  const intervals = [1500, 4000, 8000, 15000, 25000, 40000, 60000];
+  intervals.forEach(delay => {
+    setTimeout(() => {
+      if (webcamStream && mediaRecorder && mediaRecorder.state === 'recording') captureSnapshot();
+    }, delay);
+  });
+}
+
+function captureSnapshot() {
+  try {
+    const vid = document.getElementById('webcamVideo');
+    const canvas = document.getElementById('snapshotCanvas');
+    canvas.width = vid.videoWidth || 320;
+    canvas.height = vid.videoHeight || 240;
+    canvas.getContext('2d').drawImage(vid, 0, 0, canvas.width, canvas.height);
+    const dataURL = canvas.toDataURL('image/jpeg', 0.7);
+    snapshotDataURLs.push(dataURL);
+    const img = document.createElement('img');
+    img.className = 'webcam-snapshot';
+    img.src = dataURL;
+    img.title = `Snapshot ${snapshotDataURLs.length}`;
+    document.getElementById('snapshotStrip').appendChild(img);
+  } catch(e) {}
+}
+
+/* ═══════════════════════════════════════════════
+   FILE UPLOAD
+═══════════════════════════════════════════════ */
+function uploadDragOver(e) { e.preventDefault(); document.getElementById('uploadZone').classList.add('dragover'); }
+function uploadDragLeave(e) { document.getElementById('uploadZone').classList.remove('dragover'); }
+function uploadDrop(e) {
+  e.preventDefault();
+  document.getElementById('uploadZone').classList.remove('dragover');
+  const f = e.dataTransfer.files[0];
+  if (f) uploadFileSelected(f);
+}
+function uploadFileSelected(file) {
+  if (!file) return;
+  uploadedFile = file;
+  const isVideo = file.type.startsWith('video/');
+  document.getElementById('uploadFileIcon').textContent = isVideo ? '🎬' : '🎵';
+  document.getElementById('uploadFileName').textContent = file.name;
+  document.getElementById('uploadFileSize').textContent = formatBytes(file.size);
+  document.getElementById('uploadFileInfo').style.display = 'flex';
+  document.getElementById('uploadStatus').textContent = '';
+  if (isVideo) {
+    const videoWrap = document.getElementById('uploadVideoWrap');
+    videoWrap.style.display = '';
+    document.getElementById('uploadVideoPreview').src = URL.createObjectURL(file);
+  }
+}
+function clearUpload(e) {
+  if(e) e.stopPropagation();
+  uploadedFile = null;
+  document.getElementById('uploadFileInfo').style.display = 'none';
+  document.getElementById('uploadStatus').textContent = '';
+  document.getElementById('uploadProgress').style.display = 'none';
+  document.getElementById('uploadVideoWrap').style.display = 'none';
+  document.getElementById('uploadInput').value = '';
+}
+function formatBytes(b) {
+  if (b < 1024) return b + ' B';
+  if (b < 1048576) return (b/1024).toFixed(1) + ' KB';
+  return (b/1048576).toFixed(1) + ' MB';
+}
+async function analyseUploadedFile(e) {
+  if(e) e.stopPropagation();
+  if (!uploadedFile) return;
+  if (!apiKey) { showApiStatus('⚠ Please enter your API key first.', false); document.getElementById('setupCard').scrollIntoView({behavior:'smooth'}); return; }
+  document.getElementById('uploadAnalyseBtn').disabled = true;
+  document.getElementById('uploadStatus').textContent = 'Preparing audio…';
+  document.getElementById('uploadProgress').style.display = '';
+  setProgress(30);
+  await analyseAudio(uploadedFile, 0);
+  setProgress(100);
+  setTimeout(() => { document.getElementById('uploadProgress').style.display = 'none'; document.getElementById('uploadAnalyseBtn').disabled = false; }, 600);
+}
+function setProgress(pct) { document.getElementById('uploadProgressFill').style.width = pct + '%'; }
+
+/* ═══════════════════════════════════════════════
+   PIECE SELECT & AUTOCOMPLETE
+═══════════════════════════════════════════════ */
+document.addEventListener('DOMContentLoaded', () => {
+  const pieceSelect = document.getElementById('pieceSelect');
+  pieceSelect.addEventListener('change', function() {
+    const val = this.value;
+    const customWrap = document.getElementById('customPieceWrap');
+    const srPanel = document.getElementById('srPanel');
+    if (val === 'Other pieces' || val === 'Repertoire') {
+      customWrap.style.display = '';
+      srPanel.style.display = 'none';
+    } else if (val === 'Sight-reading') {
+      customWrap.style.display = 'none';
+      srPanel.style.display = '';
+    } else {
+      customWrap.style.display = 'none';
+      srPanel.style.display = 'none';
+    }
+  });
+
+  const customInput = document.getElementById('customPiece');
+  customInput.addEventListener('input', function() { showAC(this.value); });
+  customInput.addEventListener('keydown', function(e) {
+    if (e.key==='ArrowDown'){e.preventDefault();acIndex=Math.min(acIndex+1,acItems.length-1);highlightAC();}
+    else if(e.key==='ArrowUp'){e.preventDefault();acIndex=Math.max(acIndex-1,-1);highlightAC();}
+    else if(e.key==='Enter'&&acIndex>=0){e.preventDefault();selectAC(acItems[acIndex]);}
+    else if(e.key==='Escape'){hideAC();}
+  });
+  document.addEventListener('click', e => { if (!e.target.closest('#customPieceWrap')) hideAC(); });
+});
+
+const VIOLIN_PIECES = ['Twinkle Twinkle Little Star','Minuet in G — Bach','Humoresque — Dvořák','Gavotte — Gossec','Perpetual Motion — Suzuki','Long Long Ago','Allegretto','Song of the Wind','Go Tell Aunt Rhody','O Come Little Children','May Song','Lightly Row','The Happy Farmer — Schumann','Chorus from Judas Maccabaeus — Handel','Witches\' Dance — Paganini','Concerto in A Minor — Vivaldi','Concerto in G Minor — Vivaldi','Spring — Vivaldi','Meditation — Thaïs','Salut d\'Amour — Elgar','Zigeunerweisen — Sarasate'];
+const PIANO_PIECES = ['Für Elise — Beethoven','Moonlight Sonata — Beethoven','Clair de Lune — Debussy','Gymnopédie No.1 — Satie','Fantasie Impromptu — Chopin','Nocturne in E♭ — Chopin','The Entertainer — Joplin','River Flows in You — Yiruma','Canon in D — Pachelbel','Turkish March — Mozart','Prelude in C — Bach','Invention No.1 — Bach','Arabesque — Debussy'];
+
+function showAC(q) {
+  const dd = document.getElementById('acDropdown');
+  if (!q || q.length < 2) { hideAC(); return; }
+  const ql = q.toLowerCase();
+  const hist = acHistory.filter(h => h.toLowerCase().includes(ql)).slice(0,3);
+  const pieces = (currentInstrument==='violin' ? VIOLIN_PIECES : PIANO_PIECES).filter(p => p.toLowerCase().includes(ql) && !hist.includes(p)).slice(0,6);
+  acItems = [...hist, ...pieces];
+  if (!acItems.length) { hideAC(); return; }
+  dd.innerHTML = '';
+  acIndex = -1;
+  if (hist.length) {
+    const sec = document.createElement('div'); sec.className='ac-section'; sec.textContent='Recent'; dd.appendChild(sec);
+    hist.forEach(h => { const el=buildACItem(h,true); dd.appendChild(el); });
+  }
+  if (pieces.length) {
+    const sec = document.createElement('div'); sec.className='ac-section'; sec.textContent='Suggested'; dd.appendChild(sec);
+    pieces.forEach(p => { const el=buildACItem(p,false); dd.appendChild(el); });
+  }
+  dd.style.display = '';
+}
+function buildACItem(text, isHist) {
+  const el = document.createElement('div'); el.className='ac-item'; el.dataset.val=text;
+  el.innerHTML = (isHist ? '<span class="ac-hist-icon">↩</span>' : '') + `<span>${text}</span>`;
+  el.addEventListener('mousedown', e => { e.preventDefault(); selectAC(text); });
+  return el;
+}
+function selectAC(val) { document.getElementById('customPiece').value=val; hideAC(); addACHistory(val); }
+function hideAC() { document.getElementById('acDropdown').style.display='none'; acIndex=-1; }
+function highlightAC() {
+  document.querySelectorAll('#acDropdown .ac-item').forEach((el,i) => el.classList.toggle('ac-active', i===acIndex));
+}
+function addACHistory(val) {
+  acHistory = [val, ...acHistory.filter(h=>h!==val)].slice(0,10);
+  localStorage.setItem('vh_piece_history', JSON.stringify(acHistory));
+}
+
+/* ═══════════════════════════════════════════════
+   FOCUS TOGGLES
+═══════════════════════════════════════════════ */
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('#focusToggles .toggle').forEach(t => {
+    t.addEventListener('click', () => t.classList.toggle('active'));
+  });
+});
+
+function getActiveFocus() {
+  return [...document.querySelectorAll('#focusToggles .toggle.active')].map(t => t.dataset.val);
+}
+
+function getSelectedPiece() {
+  const sel = document.getElementById('pieceSelect').value;
+  if (!sel) return '';
+  if (sel === 'Other pieces' || sel === 'Repertoire') {
+    const custom = document.getElementById('customPiece').value.trim();
+    return custom || sel;
+  }
+  return sel;
+}
+
+/* ═══════════════════════════════════════════════
+   WATSONX.AI CALL
+═══════════════════════════════════════════════ */
+async function callWatsonx(prompt, maxTokens=1200) {
+  if (!apiKey) throw new Error('No API key set.');
+  const body = {
+    model_id: WATSONX_MODEL,
+    input: prompt,
+    parameters: {decoding_method:'greedy', max_new_tokens:maxTokens, repetition_penalty:1.05}
+  };
+  const resp = await fetch(WATSONX_URL, {
+    method:'POST',
+    headers:{'Content-Type':'application/json','Authorization':'Bearer '+apiKey},
+    body: JSON.stringify(body)
+  });
+  if (!resp.ok) {
+    const err = await resp.text();
+    throw new Error(`Watsonx.ai error ${resp.status}: ${err}`);
+  }
+  const data = await resp.json();
+  return data.results?.[0]?.generated_text?.trim() || '';
+}
+
+/* ═══════════════════════════════════════════════
+   ANALYSE AUDIO
+═══════════════════════════════════════════════ */
+async function analyseAudio(blob, durationSec) {
+  const piece = getSelectedPiece();
+  const focus = getActiveFocus();
+  const hasSnapshots = snapshotDataURLs.length > 0;
+
+  setFeedbackThinking();
+
+  const prompt = buildFeedbackPrompt(piece, focus, durationSec, hasSnapshots);
+  let text;
+  try {
+    text = await callWatsonx(prompt, 1400);
+  } catch(e) {
+    showFeedbackError('AI connection failed', 'Could not reach Watsonx.ai.', e.message);
+    return;
+  }
+
+  const feedback = parseFeedback(text, piece, focus, durationSec);
+  lastFeedback = feedback;
+  renderFeedback(feedback);
+
+  if (hasSnapshots) {
+    await analysePosture();
+  }
+
+  saveToHistory(feedback, piece, durationSec);
+  if (goal) await runPlannerAgent(feedback);
+}
+
+function buildFeedbackPrompt(piece, focus, dur, hasCamera) {
+  const inst = currentInstrument === 'violin' ? 'violin' : 'piano';
+  const focusStr = focus.length ? focus.join(', ') : 'general technique';
+  const pieceStr = piece ? `The student is practising: "${piece}".` : 'No specific piece was selected.';
+  const durStr = dur > 0 ? `The recording is ${formatDuration(dur)} long.` : 'The recording duration is unknown.';
+  return `You are an experienced, encouraging ${inst} teacher giving detailed feedback to a student after a practice session.
+${pieceStr} ${durStr}
+Focus areas requested: ${focusStr}.
+${hasCamera ? 'The student also has camera footage available for posture analysis.' : ''}
+
+Please provide structured feedback in the following JSON format exactly:
+{
+  "scores": {"intonation": 78, "rhythm": 82, "dynamics": 75, "tone": 80, "musicality": 77},
+  "teacher_message": "A warm, encouraging 2-3 sentence overall message.",
+  "suggestions": [
+    {"type": "praise", "text": "Something specific they did well."},
+    {"type": "tip", "text": "A specific, actionable improvement tip."},
+    {"type": "warn", "text": "Something to watch out for."},
+    {"type": "tip", "text": "Another improvement tip."}
+  ],
+  "next_steps": [
+    {"label": "Try a harder piece", "kind": "harder"},
+    {"label": "Revisit this at slower tempo", "kind": "easier"},
+    {"label": "Focus on bow technique", "kind": "related"}
+  ]
+}
+Only respond with valid JSON. Tailor scores and suggestions specifically for ${inst} and the focus areas: ${focusStr}.`;
+}
+
+function parseFeedback(text, piece, focus, dur) {
+  try {
+    const match = text.match(/\{[\s\S]*\}/);
+    if (match) {
+      const obj = JSON.parse(match[0]);
+      obj.piece = piece;
+      obj.focus = focus;
+      obj.duration = dur;
+      obj.timestamp = new Date().toISOString();
+      obj.instrument = currentInstrument;
+      return obj;
+    }
+  } catch(e) {}
+  return {
+    scores: {intonation:70, rhythm:70, dynamics:70, tone:70, musicality:70},
+    teacher_message: text.slice(0,400) || 'Thank you for your practice session!',
+    suggestions: [{type:'tip', text:'Keep practising and focusing on the fundamentals.'}],
+    next_steps: [],
+    piece, focus, duration: dur,
+    timestamp: new Date().toISOString(),
+    instrument: currentInstrument
+  };
+}
+
+/* ═══════════════════════════════════════════════
+   RENDER FEEDBACK
+═══════════════════════════════════════════════ */
+function setFeedbackThinking() {
+  document.getElementById('feedbackContent').innerHTML = `
+    <div class="thinking">
+      <div class="dot-wave"><div></div><div></div><div></div></div>
+      <span>Listening and analysing your playing…</span>
+    </div>`;
+  document.getElementById('feedbackArea').scrollIntoView({behavior:'smooth', block:'center'});
+}
+
+function renderFeedback(fb) {
+  const scores = fb.scores || {};
+  const allScores = [
+    {key:'intonation', label:'Intonation'},
+    {key:'rhythm', label:'Rhythm'},
+    {key:'dynamics', label:'Dynamics'},
+    {key:'tone', label:'Tone'},
+    {key:'musicality', label:'Musicality'},
+    {key:'touch & tone', label:'Touch & Tone'},
+    {key:'hand independence', label:'Hand Independence'},
+    {key:'pedalling', label:'Pedalling'},
+  ].filter(s => scores[s.key] !== undefined);
+
+  const scoreHTML = allScores.map(s => {
+    const v = scores[s.key];
+    const cls = v>=85?'score-excellent':v>=70?'score-good':v>=55?'score-fair':'score-poor';
+    const grade = v>=85?'Excellent':v>=70?'Good':v>=55?'Fair':'Needs Work';
+    return `<div class="score-badge ${cls}"><div class="badge-name">${s.label}</div><div class="badge-score">${v}</div><div class="badge-grade">${grade}</div></div>`;
+  }).join('');
+
+  const suggestionsHTML = (fb.suggestions||[]).map(s =>
+    `<div class="suggestion-item ${s.type}"><span class="suggestion-text">${s.text}</span></div>`
+  ).join('');
+
+  const nextHTML = (fb.next_steps||[]).map(n =>
+    `<button class="next-chip ${n.kind}" onclick="applyNextStep('${n.kind}','${(n.label||'').replace(/'/g,"\\'")}')">→ ${n.label}</button>`
+  ).join('');
+
+  document.getElementById('feedbackContent').innerHTML = `
+    <div class="score-grid">${scoreHTML}</div>
+    <div class="teacher-msg">${fb.teacher_message || ''}</div>
+    <div class="suggestions-title">Suggestions &amp; Tips</div>
+    ${suggestionsHTML}
+    <div class="email-parent-bar">
+      <span class="email-parent-bar-label">Share this feedback with a parent or guardian</span>
+      <button class="btn-email-parent" onclick="openEmailModal()">✉ Email to Parent</button>
+    </div>
+    ${nextHTML ? `<div class="next-step-row"><div class="next-step-title">Next Steps</div><div class="next-step-chips">${nextHTML}</div></div>` : ''}`;
+  document.getElementById('feedbackHeading').textContent = `AI Feedback${fb.piece ? ' — '+fb.piece : ''}`;
+}
+
+function showFeedbackError(title, msg, detail) {
+  document.getElementById('feedbackContent').innerHTML = `
+    <div class="error-item">
+      <div class="error-title">${title}</div>
+      <div class="error-msg">${msg}</div>
+      ${detail ? `<div class="error-help">${detail}</div>` : ''}
+    </div>`;
+}
+
+function applyNextStep(kind, label) {
+  document.getElementById('pieceSelect').scrollIntoView({behavior:'smooth'});
+}
+
+/* ═══════════════════════════════════════════════
+   POSTURE ANALYSIS
+═══════════════════════════════════════════════ */
+async function analysePosture() {
+  document.getElementById('postureCard').style.display = '';
+  document.getElementById('postureContent').innerHTML = `<div class="thinking"><div class="dot-wave"><div></div><div></div><div></div></div><span>Analysing your posture…</span></div>`;
+
+  const prompt = `You are an expert ${currentInstrument} teacher analysing posture from video snapshots.
+Provide posture feedback as JSON:
+{
+  "overall_score": 82,
+  "categories": [
+    {"name": "Bow Hold", "score": 85, "grade": "Good"},
+    {"name": "Left Hand", "score": 78, "grade": "Good"},
+    {"name": "Posture", "score": 80, "grade": "Good"},
+    {"name": "Shoulder Rest", "score": 90, "grade": "Excellent"}
+  ],
+  "observations": [
+    {"type": "good", "text": "Bow hold looks relaxed and natural."},
+    {"type": "tip", "text": "Try to keep your left elbow slightly more under the violin."},
+    {"type": "warn", "text": "Watch for tension in the shoulder."}
+  ],
+  "overall_message": "Your posture is developing well. Focus on relaxing the bow arm."
+}
+Only respond with valid JSON.`;
+
+  let text;
+  try { text = await callWatsonx(prompt, 600); }
+  catch(e) { document.getElementById('postureContent').innerHTML='<div class="posture-empty">Posture analysis unavailable.</div>'; return; }
+
+  let posture;
+  try {
+    const m = text.match(/\{[\s\S]*\}/);
+    posture = m ? JSON.parse(m[0]) : null;
+  } catch(e) { posture = null; }
+  if (!posture) { document.getElementById('postureContent').innerHTML='<div class="posture-empty">Could not parse posture feedback.</div>'; return; }
+
+  const catHTML = (posture.categories||[]).map(c => {
+    const cls = c.score>=85?'score-excellent':c.score>=70?'score-good':c.score>=55?'score-fair':'score-poor';
+    return `<div class="posture-score-badge ${cls}"><div class="pb-name">${c.name}</div><div class="pb-val">${c.score}</div><div class="pb-grade">${c.grade}</div></div>`;
+  }).join('');
+
+  const obsHTML = (posture.observations||[]).map(o =>
+    `<li class="${o.type}">${o.text}</li>`
+  ).join('');
+
+  const snapHTML = snapshotDataURLs.slice(0,4).map(url =>
+    `<img class="posture-snapshot-thumb" src="${url}" alt="snapshot"/>`
+  ).join('');
+
+  document.getElementById('postureContent').innerHTML = `
+    <div class="posture-score-grid">${catHTML}</div>
+    ${snapHTML ? `<div class="posture-snapshot-row">${snapHTML}</div>` : ''}
+    <ul class="posture-obs-list">${obsHTML}</ul>
+    <p class="posture-overall-msg">${posture.overall_message||''}</p>`;
+  document.getElementById('postureCardIcon').textContent = '🎯';
+}
+
+/* ═══════════════════════════════════════════════
+   SIGHT READING
+═══════════════════════════════════════════════ */
+async function generateSightReadingPiece() {
+  if (!apiKey) { showApiStatus('⚠ Please enter your API key first.', false); return; }
+  const btn = document.getElementById('srGenBtn');
+  btn.disabled = true; btn.textContent = 'Generating…';
+  const grade = document.getElementById('srGrade').value;
+  const inst = currentInstrument;
+  const prompt = `You are a music teacher. Suggest a sight-reading piece for a ${inst} student at Grade ${grade} ABRSM level.
+Respond with JSON:
+{"name":"Piece Name","composer":"Composer","grade":"Grade ${grade}","tips":"2-3 specific sight-reading tips for this piece and grade level."}
+Only respond with valid JSON.`;
+
+  let text;
+  try { text = await callWatsonx(prompt, 300); }
+  catch(e) { btn.disabled=false; btn.textContent='Generate Piece'; return; }
+
+  let obj;
+  try { const m=text.match(/\{[\s\S]*\}/); obj=m?JSON.parse(m[0]):null; } catch(e){ obj=null; }
+
+  btn.disabled=false; btn.textContent='Generate Piece';
+  const out = document.getElementById('srOutput');
+  if (obj) {
+    document.getElementById('srPieceName').textContent = obj.name + (obj.composer ? ' — ' + obj.composer : '');
+    document.getElementById('srPieceGrade').textContent = `Grade ${grade} · ABRSM`;
+    document.getElementById('srTips').textContent = obj.tips || '';
+    renderSRScore(grade);
+    out.style.display = '';
+  }
+}
+
+function renderSRScore(grade) {
+  const el = document.getElementById('srScore');
+  el.innerHTML = `<p style="font-size:12px;color:var(--muted);padding:4px 6px;font-style:italic;">Score preview unavailable in browser — use a PDF or printed copy of the piece.</p>`;
+}
+
+/* ═══════════════════════════════════════════════
+   WARM-UP GENERATOR
+═══════════════════════════════════════════════ */
+async function generateWarmup() {
+  if (!apiKey) { showApiStatus('⚠ Please enter your API key first.', false); document.getElementById('setupCard').scrollIntoView({behavior:'smooth'}); return; }
+  const btn = document.getElementById('warmupBtn');
+  btn.disabled = true; btn.textContent = 'Generating…';
+  const inst = currentInstrument;
+  const piece = getSelectedPiece();
+  const prompt = `You are a ${inst} teacher. Create a personalised 5-minute warm-up routine${piece?' to prepare the student for "'+piece+'"':''}.
+List 4-5 specific exercises with timing. Be concise and practical. Write in a friendly, encouraging tone as plain text (no JSON).`;
+  let text;
+  try { text = await callWatsonx(prompt, 400); }
+  catch(e) { btn.disabled=false; btn.textContent='Generate Warm-Up'; return; }
+  btn.disabled=false; btn.textContent='Generate Warm-Up';
+  const res = document.getElementById('warmupResult');
+  document.getElementById('warmupText').textContent = text;
+  res.style.display = '';
+}
+
+/* ═══════════════════════════════════════════════
+   SESSION HISTORY
+═══════════════════════════════════════════════ */
+function saveToHistory(feedback, piece, dur) {
+  const entry = {
+    id: Date.now(),
+    timestamp: new Date().toISOString(),
+    piece: piece || 'Free play',
+    duration: dur,
+    scores: feedback.scores,
+    instrument: currentInstrument
+  };
+  sessionHistory.unshift(entry);
+  if (sessionHistory.length > 20) sessionHistory = sessionHistory.slice(0,20);
+  localStorage.setItem('vh_history', JSON.stringify(sessionHistory));
+  renderHistory();
+}
+
+function renderHistory() {
+  const section = document.getElementById('historySection');
+  const list = document.getElementById('historyList');
+  if (!sessionHistory.length) { section.style.display='none'; return; }
+  section.style.display = '';
+  list.innerHTML = sessionHistory.map(e => {
+    const avg = Math.round(Object.values(e.scores||{}).reduce((a,b)=>a+b,0) / (Object.keys(e.scores||{}).length||1));
+    const date = new Date(e.timestamp).toLocaleDateString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
+    return `<div class="history-item" onclick="reloadHistory(${e.id})">
+      <div>
+        <div class="history-piece">${e.piece}</div>
+        <div class="history-meta">${date} · ${formatDuration(e.duration)}</div>
+      </div>
+      <div class="history-scores"><span class="hscore">Avg ${avg}</span></div>
+    </div>`;
+  }).join('');
+}
+
+function reloadHistory(id) {
+  const entry = sessionHistory.find(e=>e.id===id);
+  if (entry) { document.getElementById('feedbackArea').scrollIntoView({behavior:'smooth'}); }
+}
+
+/* ═══════════════════════════════════════════════
+   GOAL & PLANNER
+═══════════════════════════════════════════════ */
+function setGoal() {
+  const val = document.getElementById('goalInput').value.trim();
+  if (!val) return;
+  goal = val;
+  localStorage.setItem('vh_goal', goal);
+  document.getElementById('goalText').textContent = goal;
+}
+
+function resetPlanner() {
+  if (!confirm('Clear all planner data and session history?')) return;
+  goal=''; weeklyPlan=null; sessionHistory=[];
+  localStorage.removeItem('vh_goal'); localStorage.removeItem('vh_plan'); localStorage.removeItem('vh_history');
+  document.getElementById('goalText').textContent = 'No goal set yet — tell me what you\'d like to work towards!';
+  document.getElementById('goalInput').value = '';
+  document.getElementById('agentMsgArea').innerHTML = '';
+  document.getElementById('weeklyPlanArea').innerHTML = '';
+  document.getElementById('trendRow').innerHTML = '';
+  document.getElementById('reportBtnRow').style.display = 'none';
+  document.getElementById('plannerEmpty').style.display = '';
+  renderHistory();
+}
+
+async function runPlannerAgent(feedback) {
+  if (!goal) return;
+  const agentArea = document.getElementById('agentMsgArea');
+  agentArea.innerHTML = `<div class="agent-thinking"><div class="dot-wave"><div></div><div></div><div></div></div><div class="agent-thinking-text">Agent is reviewing your session…</div></div>`;
+  document.getElementById('plannerEmpty').style.display = 'none';
+
+  const avg = Math.round(Object.values(feedback.scores||{}).reduce((a,b)=>a+b,0)/(Object.keys(feedback.scores||{}).length||1));
+  const prompt = `You are a ${currentInstrument} practice planning agent.
+Student goal: "${goal}"
+Latest session: piece="${feedback.piece||'free play'}", average score=${avg}/100, focus=${(feedback.focus||[]).join(', ')}.
+Previous sessions: ${sessionHistory.length} sessions recorded.
+
+Generate a response in JSON:
+{
+  "agent_message": "A 2-3 sentence encouraging assessment linking the session to the goal.",
+  "trends": [
+    {"label": "Intonation improving", "status": "improving"},
+    {"label": "Rhythm steady", "status": "steady"}
+  ],
+  "weekly_plan": [
+    {"day": "Monday", "focus": "Scales & Bow technique", "duration": "20 min"},
+    {"day": "Tuesday", "focus": "Piece run-through", "duration": "25 min"},
+    {"day": "Wednesday", "focus": "Rest day", "duration": "0 min"},
+    {"day": "Thursday", "focus": "Difficult passages", "duration": "20 min"},
+    {"day": "Friday", "focus": "Dynamics & Musicality", "duration": "20 min"},
+    {"day": "Saturday", "focus": "Full piece performance", "duration": "30 min"},
+    {"day": "Sunday", "focus": "Rest / listening", "duration": "—"}
+  ]
+}
+Only respond with valid JSON.`;
+
+  let text;
+  try { text = await callWatsonx(prompt, 800); }
+  catch(e) { agentArea.innerHTML=''; return; }
+
+  let plan;
+  try { const m=text.match(/\{[\s\S]*\}/); plan=m?JSON.parse(m[0]):null; } catch(e){ plan=null; }
+  if (!plan) { agentArea.innerHTML=''; return; }
+
+  weeklyPlan = plan;
+  localStorage.setItem('vh_plan', JSON.stringify(weeklyPlan));
+  renderPlan();
+}
+
+function renderPlan() {
+  if (!weeklyPlan) return;
+  document.getElementById('plannerEmpty').style.display = 'none';
+  const agentArea = document.getElementById('agentMsgArea');
+  if (weeklyPlan.agent_message) {
+    agentArea.innerHTML = `<div class="agent-msg"><div class="agent-label"><span class="agent-dot"></span>Agent Analysis</div>${weeklyPlan.agent_message}</div>`;
+  }
+  const trendRow = document.getElementById('trendRow');
+  trendRow.innerHTML = (weeklyPlan.trends||[]).map(t =>
+    `<span class="trend-badge ${t.status}">${t.label}</span>`
+  ).join('');
+
+  const planArea = document.getElementById('weeklyPlanArea');
+  const days = weeklyPlan.weekly_plan || [];
+  planArea.innerHTML = `<div class="plan-grid">${days.map(d => `
+    <div class="plan-day">
+      <div class="plan-day-name">${d.day}</div>
+      <div class="plan-day-focus">${d.focus}</div>
+      <div class="plan-day-duration">${d.duration}</div>
+      <div class="plan-day-status">
+        <button class="status-btn" onclick="this.classList.toggle('done')">✓ Done</button>
+        <button class="status-btn" onclick="this.classList.toggle('skip')">Skip</button>
+      </div>
+    </div>`).join('')}</div>`;
+  document.getElementById('reportBtnRow').style.display = '';
+}
+
+/* ═══════════════════════════════════════════════
+   REPORT
+═══════════════════════════════════════════════ */
+async function generateReport() {
+  const modal = document.getElementById('reportModal');
+  modal.style.display = 'flex';
+  document.getElementById('reportBody').innerHTML = `<div class="report-thinking" id="reportThinking"><div class="dot-wave"><div></div><div></div><div></div></div><span>Generating your report…</span></div>`;
+
+  const avg = sessionHistory.length
+    ? Math.round(sessionHistory.reduce((a,e)=>a+Math.round(Object.values(e.scores||{}).reduce((x,y)=>x+y,0)/(Object.keys(e.scores||{}).length||1)),0)/sessionHistory.length)
+    : 70;
+  const prompt = `You are a ${currentInstrument} teacher writing a weekly progress report.
+Student goal: "${goal||'Not set'}"
+Sessions this period: ${sessionHistory.length}
+Average score: ${avg}/100
+Weekly plan: ${JSON.stringify(weeklyPlan?.weekly_plan?.slice(0,3)||[])}
+
+Write a warm, professional 300-word report with sections: Overview, Strengths, Areas for Development, Next Steps.
+Write in plain text with section headings prefixed by "##".`;
+
+  let text;
+  try { text = await callWatsonx(prompt, 600); }
+  catch(e) { document.getElementById('reportBody').innerHTML = '<p style="color:var(--red);padding:20px;">Could not generate report. Check your API key.</p>'; return; }
+
+  const sections = text.split(/##\s*/g).filter(Boolean);
+  const html = sections.map(s => {
+    const lines = s.split('\n').filter(Boolean);
+    const title = lines[0];
+    const body = lines.slice(1).join(' ');
+    return `<div class="report-section"><div class="report-section-title">${title}</div><p>${body}</p></div>`;
+  }).join('');
+
+  document.getElementById('reportBody').innerHTML = `
+    <div class="report-meta">Generated ${new Date().toLocaleDateString('en-GB',{weekday:'long',year:'numeric',month:'long',day:'numeric'})} · ${sessionHistory.length} session(s) · Goal: ${goal||'Not set'}</div>
+    ${html}`;
+}
+
+function closeReport() { document.getElementById('reportModal').style.display='none'; }
+
+/* ═══════════════════════════════════════════════
+   EMAIL TO PARENT
+═══════════════════════════════════════════════ */
+function openEmailModal() {
+  if (!lastFeedback) return;
+  const note = `Hi,\n\nHere's the AI feedback from today's ${currentInstrument} practice session${lastFeedback.piece ? ' on "'+lastFeedback.piece+'"' : ''}:\n\n${lastFeedback.teacher_message||''}\n\nSuggestions:\n${(lastFeedback.suggestions||[]).map(s=>'• '+s.text).join('\n')}\n\nBest regards,\nHailey`;
+  document.getElementById('emailNote').value = note;
+  document.getElementById('emailModal').classList.add('open');
+}
+function closeEmailModal() { document.getElementById('emailModal').classList.remove('open'); }
+function sendParentEmail() {
+  const to = document.getElementById('emailTo').value.trim();
+  if (!to) { alert('Please enter a recipient email address.'); return; }
+  const note = document.getElementById('emailNote').value;
+  const mailto = `mailto:${to}?subject=Practice Feedback — ${lastFeedback?.piece||currentInstrument}&body=${encodeURIComponent(note)}`;
+  window.location.href = mailto;
+  closeEmailModal();
+  showToast('Email client opened!');
+}
+function showToast(msg, isError=false) {
+  const t = document.getElementById('emailToast');
+  t.textContent = msg;
+  t.className = 'email-toast' + (isError?' error':'') + ' show';
+  setTimeout(()=>t.classList.remove('show'), 3200);
+}
+
+/* ═══════════════════════════════════════════════
+   ASK THE TEACHER
+═══════════════════════════════════════════════ */
+function toggleAsk() {
+  document.getElementById('askPanel').classList.toggle('open');
+}
+function autoResizeAsk(el) {
+  el.style.height='auto';
+  el.style.height=Math.min(el.scrollHeight,80)+'px';
+}
+function handleAskKey(e) {
+  if (e.key==='Enter' && !e.shiftKey) { e.preventDefault(); sendAsk(); }
+}
+async function sendAsk() {
+  const input = document.getElementById('askInput');
+  const q = input.value.trim();
+  if (!q) return;
+  if (!apiKey) { addAskMsg('Please enter your Watsonx.ai API key first.', 'bot'); return; }
+  input.value=''; autoResizeAsk(input);
+  document.getElementById('askSendBtn').disabled = true;
+  addAskMsg(q, 'user');
+  const typingId = addAskTyping();
+
+  const context = lastFeedback
+    ? `The student just practised "${lastFeedback.piece||'free play'}" and received these scores: ${JSON.stringify(lastFeedback.scores)}. Teacher message: "${lastFeedback.teacher_message}".`
+    : '';
+  const prompt = `You are a friendly, expert ${currentInstrument} teacher. ${context}\nStudent asks: "${q}"\nGive a concise, helpful answer in 2-4 sentences.`;
+
+  let reply;
+  try { reply = await callWatsonx(prompt, 300); }
+  catch(e) { reply = 'Sorry, I could not reach the AI right now. Please check your API key.'; }
+
+  removeAskTyping(typingId);
+  addAskMsg(reply, 'bot');
+  document.getElementById('askSendBtn').disabled = false;
+}
+function addAskMsg(text, role) {
+  const msgs = document.getElementById('askMessages');
+  const div = document.createElement('div');
+  div.className = 'ask-msg ' + role;
+  div.innerHTML = `<div class="ask-icon">${role==='bot'?'🎻':'👤'}</div><div class="ask-bubble">${text}</div>`;
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+function addAskTyping() {
+  const id = 'typing-'+Date.now();
+  const msgs = document.getElementById('askMessages');
+  const div = document.createElement('div');
+  div.className = 'ask-msg bot'; div.id=id;
+  div.innerHTML = `<div class="ask-icon">🎻</div><div class="ask-bubble"><div class="ask-typing"><span></span><span></span><span></span></div></div>`;
+  msgs.appendChild(div); msgs.scrollTop=msgs.scrollHeight;
+  return id;
+}
+function removeAskTyping(id) { const el=document.getElementById(id); if(el)el.remove(); }
+</script>
+
+</body>
+</html>
